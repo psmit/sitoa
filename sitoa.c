@@ -1,12 +1,13 @@
 #include <string.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 
 #define BOARD_SIZE 11
 #define MAX_CLUSTERS 30
 
-typedef unsigned __int128 board_col_t;
+typedef __uint128_t board_col_t;
 
 board_col_t NEIGHBORS[BOARD_SIZE * BOARD_SIZE];
 
@@ -16,7 +17,7 @@ board_col_t ONE_128 = 1;
 board_col_t BLACK_START;
 board_col_t WHITE_START;
 
-void init_tables() {
+void init() {
     int x, y;
     board_col_t neighbors;
     for (x = 0; x < BOARD_SIZE; ++x) {
@@ -177,34 +178,90 @@ void print_board(board_col_t white, board_col_t black) {
     }
 }
 
+void do_move(board_col_t mycolor, board_col_t othercolor, board_col_t * from, board_col_t  * to) {
+    board_col_t clusters[MAX_CLUSTERS];
+    int num_clusters = find_clusters(mycolor, clusters);
+    *from = ONE_128;
+    *to = ONE_128;
+}
+
+board_col_t parse_move(char * in) {
+    int x = in[0] - 'A';
+    int y = atoi(in + 1);
+
+    return ONE_128 << x * BOARD_SIZE + y;
+}
+
+void print_loc(board_col_t loc) {
+    int idx = ctz128(loc);
+    int x = idx / BOARD_SIZE;
+    int y = idx % BOARD_SIZE;
+    putc('A'+x,stdout);
+    printf("%i", y+1);
+}
+
+
+
+void game_loop() {
+    size_t nbytes = 0;
+    char *line = NULL;
+
+    board_col_t mycolor = BLACK_START;
+    board_col_t othercolor = WHITE_START;
+
+    board_col_t from, to;
+    int idx;
+
+    while(getline(&line, &nbytes, stdin))
+    {
+        if (strcmp(line, "Start\n") == 0) {
+            mycolor = WHITE_START;
+            othercolor = BLACK_START;
+        } else if (strcmp(line, "Quit\n") == 0) {
+            return;
+        } else {
+            char* fromc = strtok(line, "-");
+            char* toc = strtok(NULL, "-");
+
+            from = parse_move(fromc);
+            to = parse_move(toc);
+
+            othercolor ^= from;
+            othercolor |= to;
+        }
+
+        do_move(mycolor, othercolor, &from, &to);
+        print_loc(from);
+        putc('-', stdout);
+        print_loc(to);
+        puts("");
+        fflush(stdout);
+    }
+    free(line);
+}
+
 
 int main( int argc, const char* argv[] )
 {
-    init_tables();
-
-    board_col_t empty = 0;
-    board_col_t black = BLACK_START;
-    board_col_t white = WHITE_START;
-
-    int i = 0;
-
-    for(i = 0; i < BOARD_SIZE * BOARD_SIZE; ++i) {
-        printf("\n%i\n", i);
-        print_board(ONE_128 << i, NEIGHBORS[i]);
-    }
-
-
-    print_board(white, black);
-
-    board_col_t clusters[MAX_CLUSTERS];
-    int num_clusters = find_clusters(black, clusters);
-
-    for (i = 0; i < num_clusters; ++i) {
-        printf("\ncluster %i\n", i);
-        print_board(find_moves(clusters[i], black, white), clusters[i]);
-    }
-
-    printf( "\nHello World %i\n\n", num_clusters );
+    init();
+    game_loop();
+//    board_col_t empty = 0;
+//    board_col_t black = BLACK_START;
+//    board_col_t white = WHITE_START;
+//
+//    int i = 0;
+//
+//    print_board(white, black);
+//
+//    board_col_t clusters[MAX_CLUSTERS];
+//    int num_clusters = find_clusters(black, clusters);
+//
+//    for (i = 0; i < num_clusters; ++i) {
+//        printf("\ncluster %i\n", i);
+//        print_board(find_moves(clusters[i], black, white), clusters[i]);
+//    }
+//
+//    printf( "\nHello World %i\n\n", num_clusters );
 
     return 0;
 }
