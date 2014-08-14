@@ -1,0 +1,210 @@
+#include <string.h>
+#include <inttypes.h>
+#include <stdio.h>
+
+
+#define BOARD_SIZE 11
+#define MAX_CLUSTERS 30
+
+typedef unsigned __int128 board_col_t;
+
+board_col_t NEIGHBORS[BOARD_SIZE * BOARD_SIZE];
+
+board_col_t ZERO_128 = 0;
+board_col_t ONE_128 = 1;
+
+board_col_t BLACK_START;
+board_col_t WHITE_START;
+
+void init_tables() {
+    int x, y;
+    board_col_t neighbors;
+    for (x = 0; x < BOARD_SIZE; ++x) {
+        for (y = 0; y < BOARD_SIZE; ++y) {
+            neighbors = 0;
+
+            if(x > 0) {
+                neighbors |= ONE_128 << (x-1) * BOARD_SIZE + y;
+            }
+
+            if(y > 0) {
+                neighbors |= ONE_128 << x * BOARD_SIZE + (y-1);
+            }
+
+            if(x < BOARD_SIZE - 1) {
+                neighbors |= ONE_128 << (x+1) * BOARD_SIZE + y;
+            }
+
+            if(y < BOARD_SIZE - 1) {
+                neighbors |= ONE_128 << x * BOARD_SIZE + (y+1);
+            }
+
+            NEIGHBORS[x* BOARD_SIZE + y] = neighbors;
+        }
+    }
+
+//    BLACK_START = 426;
+    BLACK_START = 682;
+    BLACK_START = BLACK_START | BLACK_START << 22 | BLACK_START << 44 | BLACK_START << 66 | BLACK_START << 88 | BLACK_START << 110;
+    WHITE_START = 1365;
+    WHITE_START = WHITE_START << 11 | WHITE_START << 33 | WHITE_START << 55 | WHITE_START << 77 | WHITE_START << 99;
+}
+
+int ctz128(board_col_t x) {
+    // Find trailing zeros for 128 bit variable
+    union {
+        board_col_t y;
+        uint64_t yp[2];
+    } u;
+    u.y = x;
+
+    if (u.yp[0]) {
+        return __builtin_ctzll(u.yp[0]);
+    } else{
+        return 64 + __builtin_ctzll(u.yp[1]);
+    }
+
+}
+
+board_col_t find_neighbors(board_col_t board) {
+    // initialize neighbors with board to be able to filter them on the end
+    board_col_t neighbors = board;
+    // create working board b
+    board_col_t b = board;
+
+    board_col_t piece;
+
+    // loop through all pieces one at a time
+    while (b) {
+        //identify single piece
+        piece = b & (-b);
+        // remove piece from working board
+        b ^= piece;
+
+        // Add neighbors of piece to neighbors collection
+        neighbors |= NEIGHBORS[ctz128(piece)];
+    }
+
+    // remove board from neighbors before returning it
+    return neighbors ^ board;
+}
+
+
+int find_clusters(board_col_t board, board_col_t clusters[MAX_CLUSTERS]) {
+    board_col_t cluster;
+    board_col_t neighbors;
+    int num_clusters = 0;
+
+    memset(clusters, 0, sizeof clusters);
+
+    while(board) {
+        //initialize cluster with first stone
+        cluster = board & (-board);
+        //remove stones in cluster from board
+        board ^= cluster;
+
+        // expand cluster with it's neighbors
+        while (1) {
+            // TODO would it be more efficient to search with only new neighbors?
+            neighbors = find_neighbors(cluster);
+
+            if (board & neighbors) {
+                // add neighbors that are also on the board
+                cluster |= (board & neighbors);
+                // and remove them from the board
+                board ^= (board & neighbors);
+            } else {
+                break;
+            }
+        }
+
+        clusters[num_clusters++] = cluster;
+    }
+
+    return num_clusters;
+}
+
+board_col_t find_moves(board_col_t source, board_col_t targets, board_col_t blockades) {
+    // make sure the source does not overlap with the targets
+    targets ^= source;
+
+    board_col_t distances[BOARD_SIZE * BOARD_SIZE];
+    board_col_t cum_field = source;
+
+    unsigned distance = 0;
+    distances[distance] = source;
+
+    while(distances[distance] && !(distances[distance] & targets)) {
+        distances[++distance] = find_neighbors(cum_field);
+        distances[distance] ^= distances[distance] & blockades;
+        cum_field |= distances[distance];
+    }
+
+    if(!distances[distance]) {
+        return ZERO_128;
+    }
+
+    targets &= distances[distance];
+    distances[distance] = targets;
+    for (; distance > 1; --distance) {
+        distances[distance - 1] &= find_neighbors(distances[distance]);
+    }
+
+    return distances[1];
+}
+
+void print_board(board_col_t white, board_col_t black) {
+    int row, col;
+    board_col_t cur_row_black;
+    board_col_t cur_row_white;
+    char chars[BOARD_SIZE + 1];
+    chars[BOARD_SIZE] = '\0';
+    for(row = BOARD_SIZE -1; row >= 0; --row) {
+        cur_row_black = black >> row * 11;
+        cur_row_white = white >> row * 11;
+        for(col = 0; col < BOARD_SIZE; ++col) {
+            if (cur_row_white & cur_row_black & 1 << (col)) {
+                chars[col] = '!';
+            }
+            else if (cur_row_black & 1 << (col)) {
+                chars[col] = 'B';
+            } else if (cur_row_white & 1 << (col)) {
+                chars[col] = 'W';
+            }
+            else chars[col] = '.';
+        }
+        puts(chars);
+    }
+}
+
+
+int main( int argc, const char* argv[] )
+{
+    init_tables();
+
+    board_col_t empty = 0;
+    board_col_t black = BLACK_START;
+    board_col_t white = WHITE_START;
+
+    int i = 0;
+
+    for(i = 0; i < BOARD_SIZE * BOARD_SIZE; ++i) {
+        printf("\n%i\n", i);
+        print_board(ONE_128 << i, NEIGHBORS[i]);
+    }
+
+
+    print_board(white, black);
+
+    board_col_t clusters[MAX_CLUSTERS];
+    int num_clusters = find_clusters(black, clusters);
+
+    for (i = 0; i < num_clusters; ++i) {
+        printf("\ncluster %i\n", i);
+        print_board(find_moves(clusters[i], black, white), clusters[i]);
+    }
+
+    printf( "\nHello World %i\n\n", num_clusters );
+
+    return 0;
+}
