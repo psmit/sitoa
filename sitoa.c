@@ -5,7 +5,7 @@
 
 
 #define BOARD_SIZE 11
-#define MAX_CLUSTERS 30
+#define MAX_VERTICES 30
 
 typedef __uint128_t board_col_t;
 
@@ -91,7 +91,7 @@ board_col_t find_neighbors(board_col_t board) {
 }
 
 
-int find_clusters(board_col_t board, board_col_t clusters[MAX_CLUSTERS]) {
+int find_clusters(board_col_t board, board_col_t clusters[MAX_VERTICES]) {
     board_col_t cluster;
     board_col_t neighbors;
     int num_clusters = 0;
@@ -154,6 +154,90 @@ board_col_t find_moves(board_col_t source, board_col_t targets, board_col_t bloc
     return distances[1];
 }
 
+int min(int a, int b){
+    if (a < b) {
+        return a;
+    }
+    return b;
+}
+
+void find_articulation_points_recursive(board_col_t graph, board_col_t un, int ui, int * time, board_col_t * visited, int disc[MAX_VERTICES],
+        int low[MAX_VERTICES], int parent[MAX_VERTICES], board_col_t * articulation_points) {
+
+    int children = 0;
+
+    // mark node visited
+    (*visited) |= un;
+
+    disc[ui] = low[ui] = ++(*time);
+
+    board_col_t neighbors = NEIGHBORS[un];
+    board_col_t nn;
+    int ni;
+
+    while(neighbors) {
+        nn = neighbors & (-neighbors);
+        neighbors ^= nn;
+
+        ni = ctz128(nn);
+
+        if(! (nn & graph)) continue;
+
+        if(nn & ~(*visited)) {
+            children++;
+            parent[ni] = ui;
+            find_articulation_points_recursive(graph, nn, ni, time, visited, disc, low, parent, articulation_points);
+
+            low[ui] = min(low[ui], low[ni]);
+
+            if (parent[ui] < 0 && children > 1) {
+                (*articulation_points) |= un;
+            }
+
+            if (parent[ui] >= 0 && low[ni] >= disc[ui]) {
+                (*articulation_points) |= un;
+            }
+
+        } else if (ni != parent[ui]) {
+            low[ui] = min(low[ui], disc[ni]);
+        }
+    }
+}
+
+board_col_t find_articulation_points(board_col_t graph) {
+    // max vertices = 30
+
+    int parent[MAX_VERTICES];
+    int disc[MAX_VERTICES];
+    int low[MAX_VERTICES];
+
+    board_col_t visited = 0;
+    board_col_t articulation_points = 0;
+
+    int i;
+    for (i = 0; i < MAX_VERTICES; ++i) {
+        parent[i] = -1;
+    }
+
+    board_col_t un;
+    int ui;
+
+    int time = 0;
+
+    board_col_t wgraph = graph;
+
+    while(wgraph) {
+        un = wgraph & (-wgraph);
+        wgraph ^= un;
+        if(un & ~visited) {
+            ui = ctz128(un);
+            find_articulation_points_recursive(graph, un, ui, &time, &visited, disc, low, parent, &articulation_points);
+        }
+    }
+
+    return articulation_points;
+}
+
 void print_board(board_col_t white, board_col_t black) {
     int row, col;
     board_col_t cur_row_black;
@@ -179,7 +263,7 @@ void print_board(board_col_t white, board_col_t black) {
 }
 
 void do_move(board_col_t mycolor, board_col_t othercolor, board_col_t * from, board_col_t  * to) {
-    board_col_t clusters[MAX_CLUSTERS];
+    board_col_t clusters[MAX_VERTICES];
     int num_clusters = find_clusters(mycolor, clusters);
     *from = ONE_128;
     *to = ONE_128;
@@ -240,6 +324,14 @@ void game_loop() {
     free(line);
 }
 
+board_col_t parse_hex_board(char * s) {
+    board_col_t board = 0;
+    
+}
+
+void print_hex_board(board_col_t board) {
+
+}
 
 int main( int argc, const char* argv[] )
 {
@@ -253,7 +345,7 @@ int main( int argc, const char* argv[] )
 //
 //    print_board(white, black);
 //
-//    board_col_t clusters[MAX_CLUSTERS];
+//    board_col_t clusters[MAX_VERTICES];
 //    int num_clusters = find_clusters(black, clusters);
 //
 //    for (i = 0; i < num_clusters; ++i) {
