@@ -17,8 +17,8 @@ board_col_t read_move(char * in_string) {
 
     sscanf(in_string, "%c%d-%c%d", &c_from, &i_from, &c_to, &i_to);
 
-    board_col_t from = (ONE_128 << (c_from - 'A') + (i_from - 1) * BOARD_SIZE);
-    board_col_t to = ONE_128 << (c_to - 'A') + (i_to - 1) * BOARD_SIZE;
+    board_col_t from = ONE_128 << ((c_from - 'A') + (i_from - 1) * BOARD_SIZE);
+    board_col_t to = ONE_128 << ((c_to - 'A') + (i_to - 1) * BOARD_SIZE);
     return  from | to ;
 }
 
@@ -60,7 +60,7 @@ void visualize_board(char * out_string, char * print_chars, ...) {
 
     for (row = BOARD_SIZE -1; row >= 0; --row) {
         for (col = 0; col < BOARD_SIZE; ++col) {
-            cur_cell = ONE_128 << col + (row* BOARD_SIZE);
+            cur_cell = ONE_128 << (col + row * BOARD_SIZE);
             // . is the default 'empty' char
             cur_char = '.';
             for(board_i = 0; board_i < num_boards; ++board_i) {
@@ -75,6 +75,28 @@ void visualize_board(char * out_string, char * print_chars, ...) {
                 }
             }
             *(out_string++) = cur_char;
+        }
+        // Terminate every row with a newline
+        *(out_string++) = '\n';
+    }
+    // Terminate the string properly
+    *(out_string) = '\0';
+}
+
+void visualize_board_int(char * out_string, int * board) {
+    // The size of out_string should be BOARD_SIZE * (BOARD_SIZE + 1) + 1 or bigger
+
+    // Print boards into string
+    int row, col;
+
+    board_col_t cur_cell;
+    int cell_id;
+
+
+    for (row = BOARD_SIZE -1; row >= 0; --row) {
+        for (col = 0; col < BOARD_SIZE; ++col) {
+            cell_id = col + row * BOARD_SIZE;
+            out_string += sprintf(out_string, "%2d ", board[cell_id]);
         }
         // Terminate every row with a newline
         *(out_string++) = '\n';

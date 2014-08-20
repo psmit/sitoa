@@ -20,8 +20,9 @@ int main( int argc, const char* argv[] ) {
 
     puts(out);
 
-    b = hex_to_board("00aa8002aa000aa8002aa000aa8002aa");
+    b = hex_to_board("00000005000000051403803d01403801");
 
     visualize_board(out, "B", b);
     puts(out);
+    return 0;
 }

@@ -21,19 +21,19 @@ void init() {
             neighbors = 0;
 
             if(x > 0) {
-                neighbors |= ONE_128 << (x-1) * BOARD_SIZE + y;
+                neighbors |= ONE_128 << ((x-1) * BOARD_SIZE + y);
             }
 
             if(y > 0) {
-                neighbors |= ONE_128 << x * BOARD_SIZE + (y-1);
+                neighbors |= ONE_128 << (x * BOARD_SIZE + (y-1));
             }
 
             if(x < BOARD_SIZE - 1) {
-                neighbors |= ONE_128 << (x+1) * BOARD_SIZE + y;
+                neighbors |= ONE_128 << ((x+1) * BOARD_SIZE + y);
             }
 
             if(y < BOARD_SIZE - 1) {
-                neighbors |= ONE_128 << x * BOARD_SIZE + (y+1);
+                neighbors |= ONE_128 << (x * BOARD_SIZE + (y+1));
             }
 
             NEIGHBORS[x* BOARD_SIZE + y] = neighbors;

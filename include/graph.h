@@ -1,4 +1,6 @@
 #pragma once
+#include "defs.h"
+#include "print.h"
 
 board_col_t find_neighbors(board_col_t board) {
     // initialize neighbors with board to be able to filter them on the end
@@ -58,8 +60,35 @@ int find_clusters(board_col_t board, board_col_t clusters[MAX_VERTICES]) {
 }
 
 
-void find_articulation_points_recursive(board_col_t graph, board_col_t un, int ui, int * time, board_col_t * visited, int disc[MAX_VERTICES],
-        int low[MAX_VERTICES], int parent[MAX_VERTICES], board_col_t * articulation_points) {
+void find_articulation_points_recursive(board_col_t graph, board_col_t un, int ui, int * time, board_col_t * visited, int disc[MAX_VERTICES * MAX_VERTICES],
+        int low[MAX_VERTICES * MAX_VERTICES], int parent[MAX_VERTICES * MAX_VERTICES], board_col_t * articulation_points) {
+
+//    char out[512];
+//    printf("Graph\n");
+//    visualize_board(out, "BU", graph ^ un, un);
+//    puts(out);
+//
+//    printf("Visited\n");
+//    visualize_board(out, "V", *visited);
+//    puts(out);
+//
+//    printf("Disc\n");
+//    visualize_board_int(out, disc);
+//    puts(out);
+//
+//    printf("Low\n");
+//    visualize_board_int(out, low);
+//    puts(out);
+//
+//    printf("Parent\n");
+//    visualize_board_int(out, parent);
+//    puts(out);
+//
+//    printf("AP\n");
+//    visualize_board(out, "a", *articulation_points);
+//    puts(out);
+//
+//    fflush(stdout);
 
     int children = 0;
 
@@ -68,7 +97,7 @@ void find_articulation_points_recursive(board_col_t graph, board_col_t un, int u
 
     disc[ui] = low[ui] = ++(*time);
 
-    board_col_t neighbors = NEIGHBORS[un];
+    board_col_t neighbors = NEIGHBORS[ui];
     board_col_t nn;
     int ni;
 
@@ -104,16 +133,18 @@ void find_articulation_points_recursive(board_col_t graph, board_col_t un, int u
 board_col_t find_articulation_points(board_col_t graph) {
     // max vertices = 30
 
-    int parent[MAX_VERTICES];
-    int disc[MAX_VERTICES];
-    int low[MAX_VERTICES];
+    int parent[MAX_VERTICES * MAX_VERTICES];
+    int disc[MAX_VERTICES * MAX_VERTICES];
+    int low[MAX_VERTICES * MAX_VERTICES];
 
-    board_col_t visited = 0;
-    board_col_t articulation_points = 0;
+    board_col_t visited = ZERO_128;
+    board_col_t articulation_points = ZERO_128;
 
     int i;
-    for (i = 0; i < MAX_VERTICES; ++i) {
+    for (i = 0; i < (MAX_VERTICES * MAX_VERTICES); ++i) {
         parent[i] = -1;
+        disc[i] = 0;
+        low[i] = 0;
     }
 
     board_col_t un;
