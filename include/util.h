@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sys/time.h>
+
 int ctz128(board_col_t x) {
     // Find trailing zeros for 128 bit variable
     union {
@@ -31,4 +33,14 @@ int min(int a, int b){
         return a;
     }
     return b;
+}
+
+void init_rand() {
+    struct timeval time;
+    gettimeofday(&time,NULL);
+    unsigned int seed = (time.tv_sec * 1000) + (time.tv_usec / 1000);
+
+    fprintf(stderr,"Rand init with seed %x\n", seed);
+
+    srand(seed);
 }
