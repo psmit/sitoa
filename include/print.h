@@ -124,7 +124,7 @@ void board_to_hex(char * out_string, board_col_t board) {
 
 board_col_t hex_to_board(char * in_string) {
     char work_string[33];
-    strcpy(work_string, in_string);
+    strncpy(work_string, in_string,32);
 
     board_col_t board = ZERO_128;
 
