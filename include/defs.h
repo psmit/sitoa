@@ -2,6 +2,7 @@
 
 #define BOARD_SIZE 11
 #define MAX_VERTICES 30
+#define MAX_MOVES 500
 
 typedef __uint128_t board_col_t;
 

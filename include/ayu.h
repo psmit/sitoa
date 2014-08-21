@@ -79,3 +79,60 @@ int find_possible_moves(board_col_t board_mover, board_col_t board_other, board_
 
     return num_moves;
 }
+
+int find_solution_distance(board_col_t board, board_col_t other) {
+    // Solution distance is the amounts of steps needed on the current board to end with 0 possible moves
+
+    // Building minimum spanning tree by taking a base cluster
+    //  - add closest cluster and record distance
+    // - repeat
+    // If no closest clusters, but there are clusters left: start new base cluster
+    int sol_distance = 0;
+
+    board_col_t clusters[MAX_VERTICES];
+    int num_clusters = find_clusters(board, clusters);
+
+    int base_cluster = 0;
+
+    // we stop when we have the same amount base clusters and clusters
+    while(base_cluster < num_clusters -1) {
+
+        board_col_t cum_field = clusters[base_cluster];
+        int distance = 0;
+
+        board_col_t neighbours = find_neighbors(cum_field);
+        neighbours &= ~other;
+
+        // Grow our field until we find a piece of our own
+        while(neighbours && !(neighbours & board)) {
+            cum_field |= neighbours;
+            neighbours = find_neighbors(cum_field);
+            neighbours &= ~cum_field;
+            neighbours &= ~other;
+            distance++;
+        }
+
+        // either we found a reachable cluster, or we can't reach anything anymore
+        if (neighbours & board) {
+            // we know we can reach a cluster, find out which one it is
+            int cluster_i;
+            for (cluster_i = base_cluster + 1; cluster_i < num_clusters; ++cluster_i) {
+                if (neighbours & clusters[cluster_i]) {
+                    // add the cluster to the base and remove it from the list
+                    clusters[base_cluster] |= clusters[cluster_i];
+                    clusters[cluster_i] = clusters[--num_clusters];
+
+                    sol_distance += distance;
+                    // add only one cluster at a time
+                    break;
+                }
+            }
+        } else {
+            // create a new base cluster
+            base_cluster++;
+        }
+
+    }
+
+    return sol_distance;
+}
