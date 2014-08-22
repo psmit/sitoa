@@ -17,7 +17,7 @@ int score_and_filter_moves(board_t my_color, board_t other_color, board_t * move
 
     int best_score = BOARD_SIZE * BOARD_SIZE;
     for (m = 0; m < num_moves; ++m) {
-        scores[m] = find_solution_distance(my_color ^ moves[m], other_color);
+        scores[m] = find_solution_distance(my_color ^ moves[m], other_color) - find_solution_distance(other_color, my_color ^ moves[m]);
         if (scores[m] < best_score) {
             best_score = scores[m];
         }

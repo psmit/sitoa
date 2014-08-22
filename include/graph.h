@@ -30,8 +30,6 @@ int find_clusters(board_t board, board_t clusters[MAX_VERTICES]) {
     board_t neighbors;
     int num_clusters = 0;
 
-    memset(clusters, 0, sizeof clusters);
-
     while(board) {
         //initialize cluster with first stone
         cluster = board.lso();
@@ -138,6 +136,3 @@ board_t find_articulation_points(board_t graph) {
 
     return articulation_points;
 }
-
-
-
