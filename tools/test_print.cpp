@@ -3,10 +3,9 @@
 
 
 int main( int argc, const char* argv[] ) {
-    init();
 
-    board_col_t b = BLACK_START;
-    board_col_t w = WHITE_START;
+    board_t b = B_BLACK_START;
+    board_t w = B_WHITE_START;
 
     char out[256];
 

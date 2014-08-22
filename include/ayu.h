@@ -2,11 +2,11 @@
 #include "defs.h"
 #include "graph.h"
 
-board_col_t find_moves_targets(board_col_t source, board_col_t targets, board_col_t blockades) {
+board_t find_moves_targets(board_t source, board_t targets, board_t blockades) {
 //    targets ^= source;
 
-    board_col_t distances[BOARD_SIZE * BOARD_SIZE];
-    board_col_t cum_field = source;
+    board_t distances[BOARD_SIZE * BOARD_SIZE];
+    board_t cum_field = source;
 
     unsigned distance = 0;
     distances[distance] = source;
@@ -18,7 +18,7 @@ board_col_t find_moves_targets(board_col_t source, board_col_t targets, board_co
     }
 
     if(!distances[distance]) {
-        return ZERO_128;
+        return B_EMPTY;
     }
 
     targets &= distances[distance];
@@ -30,14 +30,14 @@ board_col_t find_moves_targets(board_col_t source, board_col_t targets, board_co
     return distances[1];
 }
 
-int find_possible_moves(board_col_t board_mover, board_col_t board_other, board_col_t * moves) {
+int find_possible_moves(board_t board_mover, board_t board_other, board_t * moves) {
 
     int num_moves = 0;
 
-    board_col_t targets, sources, target, source, sources_tmp;
+    board_t targets, sources, target, source, sources_tmp;
 
     // Moves are found cluster by cluster
-    board_col_t clusters[MAX_VERTICES];
+    board_t clusters[MAX_VERTICES];
     int num_clusters = find_clusters(board_mover, clusters);
 
     int cluster_i;
@@ -53,12 +53,13 @@ int find_possible_moves(board_col_t board_mover, board_col_t board_other, board_
 
         while (targets) {
             //identify single target
-            target = targets & (-targets);
+            target = targets.lso();
+
             // remove target from targets
             targets ^= target;
 
             // special case if cluster is of size 1, move is always valid
-            if (popcount128(clusters[cluster_i]) == 1) {
+            if (clusters[cluster_i].popcount() == 1) {
                 moves[num_moves++] = clusters[cluster_i] | target;
                 continue;
             }
@@ -66,11 +67,11 @@ int find_possible_moves(board_col_t board_mover, board_col_t board_other, board_
             // iterate through different sources
             sources_tmp = sources;
             while(sources_tmp) {
-                source = sources_tmp & (-sources_tmp);
+                source = sources_tmp.lso();
                 sources_tmp ^= source;
 
                 // source and target combination is valid, if target has another neighbor in cluster besides source
-                if ((NEIGHBORS[ctz128(target)] ^ source) & clusters[cluster_i]) {
+                if ((B_NEIGHBOURS[target.ctz()] ^ source) & clusters[cluster_i]) {
                     moves[num_moves++] = source | target;
                 }
             }
@@ -80,7 +81,7 @@ int find_possible_moves(board_col_t board_mover, board_col_t board_other, board_
     return num_moves;
 }
 
-int find_solution_distance(board_col_t board, board_col_t other) {
+int find_solution_distance(board_t board, board_t other) {
     // Solution distance is the amounts of steps needed on the current board to end with 0 possible moves
 
     // Building minimum spanning tree by taking a base cluster
@@ -89,7 +90,7 @@ int find_solution_distance(board_col_t board, board_col_t other) {
     // If no closest clusters, but there are clusters left: start new base cluster
     int sol_distance = 0;
 
-    board_col_t clusters[MAX_VERTICES];
+    board_t clusters[MAX_VERTICES];
     int num_clusters = find_clusters(board, clusters);
 
     int base_cluster = 0;
@@ -97,10 +98,10 @@ int find_solution_distance(board_col_t board, board_col_t other) {
     // we stop when we have the same amount base clusters and clusters
     while(base_cluster < num_clusters -1) {
 
-        board_col_t cum_field = clusters[base_cluster];
+        board_t cum_field = clusters[base_cluster];
         int distance = 0;
 
-        board_col_t neighbours = find_neighbors(cum_field);
+        board_t neighbours = find_neighbors(cum_field);
         neighbours &= ~other;
 
         // Grow our field until we find a piece of our own

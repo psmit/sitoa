@@ -4,13 +4,12 @@
 
 
 int main( int argc, const char* argv[] ) {
-    init();
 
     char out[256];
 
-    board_col_t board = ZERO_128;
+    board_t board = B_EMPTY;
 
-    board_col_t move;
+    board_t move;
 
     size_t nbytes = 0;
     char *line = NULL;
@@ -23,7 +22,7 @@ int main( int argc, const char* argv[] ) {
             puts(out);
             fflush(stdout);
         } else if (strcmp(line, "Quit\n") == 0) {
-            return;
+            return 0;
         } else {
             move = read_move(line);
             board ^= move;

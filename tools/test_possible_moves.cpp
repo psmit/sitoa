@@ -2,7 +2,6 @@
 #include "ayu.h"
 
 int main( int argc, const char* argv[] ) {
-    init();
 
     FILE * fp;
 
@@ -13,7 +12,7 @@ int main( int argc, const char* argv[] ) {
     size_t nbytes = 0;
     char *line = NULL;
 
-    board_col_t black, white;
+    board_t black, white;
 
     int num_moves;
     int move_i;
@@ -28,7 +27,7 @@ int main( int argc, const char* argv[] ) {
         fflush(stdout);
 
 
-        board_col_t possible_moves[500];
+        board_t possible_moves[500];
         num_moves = find_possible_moves(black, white, possible_moves);
 
         for (move_i = 0; move_i < num_moves; ++move_i) {

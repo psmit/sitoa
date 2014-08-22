@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+
+board_size = 11
+
+
+def print_set_hex(s):
+    val = 0
+    for x in s:
+        val = val | (1 << x)
+
+    return "{:#018x}ul".format(val)
+
+print("{")
+for i in range(board_size **2):
+    if i >= 64:
+        print("{{{:#018x}ul,{:#018x}ul}},".format(1 << i-64, 0))
+    else:
+        print("{{{:#018x}ul,{:#018x}ul}},".format(0, 1 << i))
+
+print("}")
+
+
+print ("{")
+for i in range(board_size ** 2):
+    x = i // board_size
+    y = i % board_size
+
+    neighbours = set()
+
+    if x > 0: neighbours.add((x-1) * board_size + y)
+    if y > 0: neighbours.add(x * board_size + y - 1)
+    if x < board_size - 1: neighbours.add((x+1) * board_size + y)
+    if y < board_size - 1: neighbours.add(x * board_size + y + 1)
+
+    upper_set = {x-64 for x in neighbours if x >= 64}
+    lower_set = {x for x in neighbours if x < 64}
+
+    print("{{{}, {}}},".format(print_set_hex(upper_set), print_set_hex(lower_set)))
+
+
+
+    # for (x = 0; x < BOARD_SIZE; ++x) {
+    #     for (y = 0; y < BOARD_SIZE; ++y) {
+    #         neighbors = 0;
+    #
+    #         if(x > 0) {
+    #             neighbors |= ONE_128 << ((x-1) * BOARD_SIZE + y);
+    #         }
+    #
+    #         if(y > 0) {
+    #             neighbors |= ONE_128 << (x * BOARD_SIZE + (y-1));
+    #         }
+    #
+    #         if(x < BOARD_SIZE - 1) {
+    #             neighbors |= ONE_128 << ((x+1) * BOARD_SIZE + y);
+    #         }
+    #
+    #         if(y < BOARD_SIZE - 1) {
+    #             neighbors |= ONE_128 << (x * BOARD_SIZE + (y+1));
+    #         }
+    #
+    #         NEIGHBORS[x* BOARD_SIZE + y] = neighbors;
+    #     }
+    # }
+
+print ("}")

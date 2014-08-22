@@ -2,39 +2,39 @@
 #include "defs.h"
 #include "print.h"
 
-board_col_t find_neighbors(board_col_t board) {
+board_t find_neighbors(board_t board) {
     // initialize neighbors with board to be able to filter them on the end
-    board_col_t neighbors = board;
+    board_t neighbors = board;
     // create working board b
-    board_col_t b = board;
+    board_t b = board;
 
-    board_col_t piece;
+    board_t piece;
 
     // loop through all pieces one at a time
     while (b) {
         //identify single piece
-        piece = b & (-b);
+        piece = b.lso();
         // remove piece from working board
         b ^= piece;
 
         // Add neighbors of piece to neighbors collection
-        neighbors |= NEIGHBORS[ctz128(piece)];
+        neighbors |= B_NEIGHBOURS[piece.ctz()];
     }
 
     // remove board from neighbors before returning it
     return neighbors ^ board;
 }
 
-int find_clusters(board_col_t board, board_col_t clusters[MAX_VERTICES]) {
-    board_col_t cluster;
-    board_col_t neighbors;
+int find_clusters(board_t board, board_t clusters[MAX_VERTICES]) {
+    board_t cluster;
+    board_t neighbors;
     int num_clusters = 0;
 
     memset(clusters, 0, sizeof clusters);
 
     while(board) {
         //initialize cluster with first stone
-        cluster = board & (-board);
+        cluster = board.lso();
         //remove stones in cluster from board
         board ^= cluster;
 
@@ -60,8 +60,8 @@ int find_clusters(board_col_t board, board_col_t clusters[MAX_VERTICES]) {
 }
 
 
-void find_articulation_points_recursive(board_col_t graph, board_col_t un, int ui, int * time, board_col_t * visited, int disc[BOARD_SIZE * BOARD_SIZE],
-        int low[BOARD_SIZE * BOARD_SIZE], int parent[BOARD_SIZE * BOARD_SIZE], board_col_t * articulation_points) {
+void find_articulation_points_recursive(board_t graph, board_t un, int ui, int * time, board_t * visited, int disc[BOARD_SIZE * BOARD_SIZE],
+        int low[BOARD_SIZE * BOARD_SIZE], int parent[BOARD_SIZE * BOARD_SIZE], board_t * articulation_points) {
 
     int children = 0;
 
@@ -70,15 +70,15 @@ void find_articulation_points_recursive(board_col_t graph, board_col_t un, int u
 
     disc[ui] = low[ui] = ++(*time);
 
-    board_col_t neighbors = NEIGHBORS[ui];
-    board_col_t nn;
+    board_t neighbors = B_NEIGHBOURS[ui];
+    board_t nn;
     int ni;
 
     while(neighbors) {
-        nn = neighbors & (-neighbors);
+        nn = neighbors.lso();
         neighbors ^= nn;
 
-        ni = ctz128(nn);
+        ni = nn.ctz();
 
         if(! (nn & graph)) continue;
 
@@ -103,15 +103,15 @@ void find_articulation_points_recursive(board_col_t graph, board_col_t un, int u
     }
 }
 
-board_col_t find_articulation_points(board_col_t graph) {
+board_t find_articulation_points(board_t graph) {
     // max vertices = 30
 
     int parent[BOARD_SIZE * BOARD_SIZE];
     int disc[BOARD_SIZE * BOARD_SIZE];
     int low[BOARD_SIZE * BOARD_SIZE];
 
-    board_col_t visited = ZERO_128;
-    board_col_t articulation_points = ZERO_128;
+    board_t visited = B_EMPTY;
+    board_t articulation_points = B_EMPTY;
 
     int i;
     for (i = 0; i < (BOARD_SIZE * BOARD_SIZE); ++i) {
@@ -120,18 +120,18 @@ board_col_t find_articulation_points(board_col_t graph) {
         low[i] = 0;
     }
 
-    board_col_t un;
+    board_t un;
     int ui;
 
     int time = 0;
 
-    board_col_t wgraph = graph;
+    board_t wgraph = graph;
 
     while(wgraph) {
-        un = wgraph & (-wgraph);
+        un = wgraph.lso();
         wgraph ^= un;
         if(un & ~visited) {
-            ui = ctz128(un);
+            ui = un.ctz();
             find_articulation_points_recursive(graph, un, ui, &time, &visited, disc, low, parent, &articulation_points);
         }
     }
