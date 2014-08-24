@@ -2,7 +2,12 @@
 #include "defs.h"
 #include "print.h"
 
+#include "stats.h"
+
 board_t find_neighbors(board_t board) {
+#if USE_STATS
+        statistics.find_neighbours_count++;
+#endif
     // initialize neighbors with board to be able to filter them on the end
     board_t neighbors = board;
     // create working board b

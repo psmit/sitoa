@@ -7,6 +7,9 @@
 #define WIN_SCORE 10000
 
 int negamax(board_t board_cur, board_t board_oth, int depth, int color) {
+#if USE_STATS
+        ++statistics.negamax_count;
+#endif
     if (depth == 0) {
         return find_solution_distance(board_oth, board_cur) - find_solution_distance(board_cur, board_oth);
     }

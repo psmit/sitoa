@@ -5,7 +5,7 @@
 
 #define MAX_ARGUMENTS 128
 
-board_t read_move(char * in_string) {
+board_t read_move(const char * in_string) {
     char c_from, c_to;
     int i_from, i_to;
 
@@ -25,7 +25,7 @@ void write_move(char * out_string, board_t from, board_t to) {
             'A'+ idx_to % BOARD_SIZE, (idx_to / BOARD_SIZE) + 1);
 }
 
-void visualize_board(char * out_string, char * print_chars, ...) {
+void visualize_board(char * out_string, const char * print_chars, ...) {
     // The size of out_string should be BOARD_SIZE * (BOARD_SIZE + 1) + 1 or bigger
 
     // The number of characters in print_chars is the amount of boards we expect
@@ -108,7 +108,7 @@ void board_to_hex(char * out_string, board_t board) {
     *out_string = '\0';
 }
 
-board_t hex_to_board(char * in_string) {
+board_t hex_to_board(const char * in_string) {
     char work_string[33];
     strncpy(work_string, in_string,32);
 

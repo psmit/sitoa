@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="sitoa" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="sitoa" TARGET_NAME="sitoa" CONFIG_NAME="Debug">
+  <configuration default="false" name="sitoa" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="sitoa" TARGET_NAME="sitoa" CONFIG_NAME="Debug">
     <envs />
     <RunnerSettings RunnerId="CPPAppRunner" />
     <ConfigurationWrapper RunnerId="CPPAppRunner" />

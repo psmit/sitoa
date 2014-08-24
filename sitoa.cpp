@@ -3,6 +3,8 @@
 #include "util.h"
 #include "abpruning.h"
 
+#include "stats.h"
+
 
 board_t random_move(board_t * moves, int num_moves) {
     return moves[rand() % num_moves];
@@ -59,7 +61,7 @@ board_t get_move(board_t my_color, board_t other_color, int round) {
     return random_move(possible_moves, num_moves);
 }
 
-void game_loop() {
+void game_loop(FILE * fp) {
 
 
     size_t nbytes = 0;
@@ -72,13 +74,29 @@ void game_loop() {
 
     char out[256];
 
+    char trace[256][10];
+    int num_trace;
+
     int round = 0;
-    while(getline(&line, &nbytes, stdin))
+    while(getline(&line, &nbytes, fp))
     {
+#if USE_STATS
+            statistics.resume();
+#endif
+//        trace[num_trace] = malloc(10);
+        strcpy(trace[num_trace++], line);
         if (strcmp(line, "Start\n") == 0) {
             mycolor = B_WHITE_START;
             othercolor = B_BLACK_START;
         } else if (strcmp(line, "Quit\n") == 0) {
+            fprintf(stderr, "TRACE:\n");
+            int t;
+            for (t  = 0; t < num_trace; ++t) {
+                fputs(trace[t], stderr);
+            }
+#if USE_STATS
+            statistics.dump_total(stderr);
+#endif
             return;
         } else {
             move = read_move(line);
@@ -89,7 +107,10 @@ void game_loop() {
         write_move(out, mycolor & move, ~mycolor & move);
 
         mycolor ^= move;
-
+#if USE_STATS
+        statistics.pause();
+        statistics.dump_last(stderr);
+#endif
         puts(out);
         fflush(stdout);
     }
@@ -98,8 +119,21 @@ void game_loop() {
 
 int main( int argc, const char* argv[] )
 {
-    init_rand();
 
-    game_loop();
+#if USE_STATS
+        init_stats();
+#endif
+
+    init_rand(argc > 1 ? argv[1] : "");
+
+    FILE * fp = stdin;
+    if(argc > 2) {
+        fp =fopen(argv[2], "r");
+    }
+    game_loop(fp);
+
+    if (argc > 2) {
+        fclose(fp);
+    }
     return 0;
 }

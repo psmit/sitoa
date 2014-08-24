@@ -2,6 +2,8 @@
 #include "defs.h"
 #include "graph.h"
 
+#include "stats.h"
+
 board_t find_moves_targets(board_t source, board_t targets, board_t blockades) {
 //    targets ^= source;
 
@@ -31,6 +33,9 @@ board_t find_moves_targets(board_t source, board_t targets, board_t blockades) {
 }
 
 int find_possible_moves(board_t board_mover, board_t board_other, board_t * moves) {
+#if USE_STATS
+        statistics.find_moves_count++;
+#endif
 
     int num_moves = 0;
 
@@ -82,6 +87,10 @@ int find_possible_moves(board_t board_mover, board_t board_other, board_t * move
 }
 
 int find_solution_distance(board_t board, board_t other) {
+#if USE_STATS
+        statistics.find_solution_distance_count++;
+#endif
+
     // Solution distance is the amounts of steps needed on the current board to end with 0 possible moves
 
     // Building minimum spanning tree by taking a base cluster
