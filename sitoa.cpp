@@ -2,7 +2,6 @@
 #include "ayu.h"
 #include "util.h"
 #include "abpruning.h"
-#include "moveinward.h"
 
 #include "stats.h"
 
@@ -63,19 +62,19 @@ int score_and_filter_moves(board_t my_color, board_t other_color, board_t * move
 
 board_t get_move(board_t my_color, board_t other_color, int round) {
     board_t possible_moves[MAX_MOVES];
-//    int num_moves = find_possible_moves(my_color, other_color, possible_moves);
-
-//    fprintf(stderr, "Current board: \n");
-    char out[512];
-//    visualize_board(out, "MO", my_color, other_color);
+////    int num_moves = find_possible_moves(my_color, other_color, possible_moves);
+//
+////    fprintf(stderr, "Current board: \n");
+//    char out[512];
+////    visualize_board(out, "MO", my_color, other_color);
+////    fputs(out, stderr);
+//
+//    board_to_hex(out, my_color);
+//    board_to_hex(out+33, other_color);
+//    out[32] = ' ';
+//    out[64] = '\n';
+//    out[65] = '\0';
 //    fputs(out, stderr);
-
-    board_to_hex(out, my_color);
-    board_to_hex(out+33, other_color);
-    out[32] = ' ';
-    out[64] = '\n';
-    out[65] = '\0';
-    fputs(out, stderr);
 
     int num_moves;
 

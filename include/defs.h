@@ -13,48 +13,48 @@ struct board_t {
     uint64_t hi;
     uint64_t low;
 
-    explicit operator bool() const {
+    inline explicit operator bool() const {
         return hi || low;
     }
 
-    board_t operator~() const {
+    inline board_t operator~() const {
         return {~hi, ~low};
     }
 
-    board_t operator^(const board_t& rhs) const {
+    inline board_t operator^(const board_t& rhs) const {
         return {hi ^ rhs.hi, low ^ rhs.low};
     }
 
-    board_t operator|(const board_t & rhs) const {
+    inline board_t operator|(const board_t & rhs) const {
         return {hi | rhs.hi, low | rhs.low};
     }
 
-    board_t operator&(const board_t & rhs) const {
+    inline board_t operator&(const board_t & rhs) const {
         return {hi & rhs.hi, low & rhs.low};
     }
 
-    board_t& operator^=(const board_t & rhs) {
+    inline board_t& operator^=(const board_t & rhs) {
         hi ^= rhs.hi;
         low ^= rhs.low;
         
         return *this;
     }
 
-    board_t& operator|=(const board_t & rhs) {
+    inline board_t& operator|=(const board_t & rhs) {
         hi |= rhs.hi;
         low |= rhs.low;
 
         return *this;
     }
 
-    board_t& operator&=(const board_t & rhs) {
+    inline board_t& operator&=(const board_t & rhs) {
         hi &= rhs.hi;
         low &= rhs.low;
 
         return *this;
     }
 
-    board_t lso() const {
+    inline board_t lso() const {
         if (low) {
             return {0, low & ~(low-1)};
         } else {
@@ -62,7 +62,7 @@ struct board_t {
         }
     }
 
-    int ctz() const {
+    inline int ctz() const {
         if (low) {
             return __builtin_ctzll(low);
         } else {
@@ -70,12 +70,12 @@ struct board_t {
         }
     }
 
-    int popcount() const {
+    inline int popcount() const {
         return __builtin_popcountll(hi) + __builtin_popcountll(low);
     }
 };
 
-board_t B_SINGLE_BIT[BOARD_SIZE * BOARD_SIZE] = {
+const board_t B_SINGLE_BIT[BOARD_SIZE * BOARD_SIZE] = {
         {0x0000000000000000ul,0x0000000000000001ul},
         {0x0000000000000000ul,0x0000000000000002ul},
         {0x0000000000000000ul,0x0000000000000004ul},
@@ -198,7 +198,7 @@ board_t B_SINGLE_BIT[BOARD_SIZE * BOARD_SIZE] = {
         {0x0080000000000000ul,0x0000000000000000ul},
         {0x0100000000000000ul,0x0000000000000000ul}
 };
-board_t B_NEIGHBOURS[BOARD_SIZE * BOARD_SIZE] = {
+const board_t B_NEIGHBOURS[BOARD_SIZE * BOARD_SIZE] = {
         {0x0000000000000000ul, 0x0000000000000802ul},
         {0x0000000000000000ul, 0x0000000000001005ul},
         {0x0000000000000000ul, 0x000000000000200aul},
@@ -321,11 +321,11 @@ board_t B_NEIGHBOURS[BOARD_SIZE * BOARD_SIZE] = {
         {0x0140100000000000ul, 0x0000000000000000ul},
         {0x0080200000000000ul, 0x0000000000000000ul}};
 
-board_t B_EMPTY = {0,0};
-board_t B_BLACK_START = {0x00002aa800aaa002ul, 0xaa800aaa002aa800ul};
-board_t B_WHITE_START  = {0x00aa8002aa000aa8ul, 0x002aa000aa8002aaul};
+const board_t B_EMPTY = {0,0};
+const board_t B_BLACK_START = {0x00002aa800aaa002ul, 0xaa800aaa002aa800ul};
+const board_t B_WHITE_START  = {0x00aa8002aa000aa8ul, 0x002aa000aa8002aaul};
 
-board_t B_CIRCLES[BOARD_SIZE] = {
+const board_t B_CIRCLES[BOARD_SIZE] = {
         {0x01ffe00c01803006ul, 0x00c0180300600ffful},
         {0x00001ff202404809ul, 0x01202404809ff000ul},
         {0x00000001fc208410ul, 0x821042087f000000ul},
