@@ -17,6 +17,7 @@ struct stats {
     unsigned long long negamax_count;
     unsigned long long find_moves_count;
     unsigned long long find_solution_distance_count;
+    unsigned long long prunes;
 
     void resume() {
         gettimeofday(&last_start, NULL);
@@ -35,12 +36,13 @@ struct stats {
     }
 
     void dump_last(FILE * fp) {
-        fprintf(fp, "Since last time: %.4f seconds; Nbs: %li Negam: %li Fmv: %li Fsoldis: %li\nFindNei/second %.1f; Nodes/second %.1f;\n",
+        fprintf(fp, "Since last time: %.4f seconds; Nbs: %llu Negam: %llu Fmv: %llu Fsoldis: %llu P: %llu\nFindNei/second %.1f; Nodes/second %.1f;\n",
         time_spent - prev_stats->time_spent,
         find_neighbours_count - prev_stats->find_neighbours_count,
         negamax_count - prev_stats->negamax_count,
         find_moves_count - prev_stats->find_moves_count,
         find_solution_distance_count - prev_stats->find_solution_distance_count,
+        prunes - prev_stats->prunes,
         (find_neighbours_count - prev_stats->find_neighbours_count) / (time_spent - prev_stats->time_spent),
         (negamax_count - prev_stats->negamax_count) / (time_spent - prev_stats->time_spent)
         );
@@ -55,7 +57,7 @@ struct stats {
     }
 };
 
-stats statistics = {0};
+stats statistics = {0,0,{0,0},0,0,0};
 
 void init_stats() {
     statistics.prev_stats = new stats();

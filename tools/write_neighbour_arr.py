@@ -2,6 +2,7 @@
 
 board_size = 11
 
+rings = [set() for _ in range(board_size // 2 + 1) ]
 
 def print_set_hex(s):
     val = 0
@@ -31,6 +32,8 @@ for i in range(board_size ** 2):
     if y > 0: neighbours.add(x * board_size + y - 1)
     if x < board_size - 1: neighbours.add((x+1) * board_size + y)
     if y < board_size - 1: neighbours.add(x * board_size + y + 1)
+
+    rings[min(x, y, board_size - x -1, board_size - y - 1)].add(x*board_size + y)
 
     upper_set = {x-64 for x in neighbours if x >= 64}
     lower_set = {x for x in neighbours if x < 64}
@@ -64,3 +67,13 @@ for i in range(board_size ** 2):
     # }
 
 print ("}")
+
+print ("{")
+for i in range(board_size // 2 + 1):
+    upper_set = {x-64 for x in rings[i] if x >= 64}
+    lower_set = {x for x in rings[i] if x < 64}
+    print("{{{}, {}}},".format(print_set_hex(upper_set), print_set_hex(lower_set)))
+
+
+print("}")
+

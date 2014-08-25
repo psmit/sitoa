@@ -82,7 +82,6 @@ void visualize_board_int(char * out_string, int * board) {
     // Print boards into string
     int row, col;
 
-    board_t cur_cell;
     int cell_id;
 
 
@@ -101,9 +100,9 @@ void visualize_board_int(char * out_string, int * board) {
 void board_to_hex(char * out_string, board_t board) {
     // Use datatype that stores exactly 8 hex chars
 
-    sprintf(out_string, "%016lx", board.hi);
+    sprintf(out_string, "%016llx", board.hi);
     out_string += 16;
-    sprintf(out_string, "%016lx", board.low);
+    sprintf(out_string, "%016llx", board.low);
     out_string += 16;
     *out_string = '\0';
 }

@@ -2,9 +2,32 @@
 #include "ayu.h"
 #include "util.h"
 #include "abpruning.h"
+#include "moveinward.h"
 
 #include "stats.h"
 
+int prefer_outside_to_inside_moves(board_t my_board, board_t * moves, int num_moves) {
+    int selected_moves = 0;
+    int c;
+    int m;
+    for (c = 0; c < BOARD_SIZE / 2 + 1; c++) {
+        for(m = 0; m < num_moves; ++m) {
+            if ((my_board & moves[m] & B_CIRCLES[c]) && (B_CIRCLES[c+1] & moves[m])) {
+                moves[selected_moves++] = moves[m];
+            }
+        }
+        if (selected_moves) return selected_moves;
+
+        for(m = 0; m < num_moves; ++m) {
+            if ((my_board & moves[m] & B_CIRCLES[c])) {
+                moves[selected_moves++] = moves[m];
+            }
+        }
+        if (selected_moves) return selected_moves;
+    }
+
+    return num_moves;
+}
 
 board_t random_move(board_t * moves, int num_moves) {
     return moves[rand() % num_moves];
@@ -54,10 +77,13 @@ board_t get_move(board_t my_color, board_t other_color, int round) {
     out[65] = '\0';
     fputs(out, stderr);
 
+    int num_moves;
 
-//    fprintf(stderr, "Found %d moves\n", num_moves);
-    int num_moves = best_negamax_moves(my_color, other_color, possible_moves, round);
+    num_moves = best_negamax_moves(my_color, other_color, possible_moves, round);
+
+    num_moves = prefer_outside_to_inside_moves(my_color, possible_moves, num_moves);
     fprintf(stderr, "Found %d moves after filtering\n", num_moves);
+
     return random_move(possible_moves, num_moves);
 }
 
@@ -75,7 +101,7 @@ void game_loop(FILE * fp) {
     char out[256];
 
     char trace[256][10];
-    int num_trace;
+    int num_trace = 0;
 
     int round = 0;
     while(getline(&line, &nbytes, fp))
