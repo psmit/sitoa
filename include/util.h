@@ -33,3 +33,21 @@ void init_rand(const char * s) {
 
     srand(seed);
 }
+
+int rand_i(int min, int max) {
+    return min + rand() %(max-min);
+}
+
+void shuffle(board_t * moves, int num_moves) {
+    int m;
+    int n;
+    for (m = 0; m < num_moves; ++m) {
+        n = rand_i(m, num_moves);
+        if (n != m) {
+            moves[m] ^= moves[n];
+            moves[n] ^= moves[m];
+            moves[m] ^= moves[n];
+        }
+
+    }
+}
