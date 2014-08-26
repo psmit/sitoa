@@ -7,7 +7,9 @@
 
 #define WIN_SCORE 10000
 
-#define NODES_PER_MOVE 100000
+#define NODES_PER_MOVE 300000
+#define DEPTH_BREAKER 1
+#define MAX_DEPTH 10
 
 int negamax_ab(board_t board_cur, board_t board_oth, int depth, int alpha, int beta) {
 #if USE_STATS
@@ -52,7 +54,8 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t * moves, 
     depth = 1;
 
     if (num_possible_moves < 30 && num_possible_moves > 1) {
-        depth = (int)(log((double) NODES_PER_MOVE) / log((double) num_possible_moves)) -1;
+        depth = (int)(log((double) NODES_PER_MOVE) / log((double) num_possible_moves + DEPTH_BREAKER)) -1;
+        depth = min(MAX_DEPTH, depth);
     }
 
     fprintf(stderr, "Num moves %i depth %i \n", num_possible_moves, depth);
