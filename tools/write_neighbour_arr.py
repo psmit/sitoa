@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import random
+
 board_size = 11
 
 rings = [set() for _ in range(board_size // 2 + 1) ]
@@ -93,7 +95,6 @@ for i in range(board_size // 2 + 1):
     print("{{{}, {}}},".format(print_set_hex(upper_set), print_set_hex(lower_set)))
 
 
-
 print("}")
 
 print("{")
@@ -101,3 +102,18 @@ print(", ".join(str(x) for x in move_prio))
 print("}")
 
 print(len(move_prio))
+
+
+
+print ("{")
+for i in range(board_size * board_size):
+    print("{{{:#010x}, {:#010x}}},".format(random.getrandbits(32),random.getrandbits(32)), end=" ")
+
+print("}")
+
+
+print ("{")
+for i in range(board_size * board_size):
+    print("{{{:#018x}ul, {:#018x}ul}},".format(random.getrandbits(64),random.getrandbits(64)), end=" ")
+
+print("}")

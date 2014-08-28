@@ -60,25 +60,12 @@ int score_and_filter_moves(board_t my_color, board_t other_color, board_t * move
 }
 
 
-board_t get_move(board_t my_color, board_t other_color, int round) {
+board_t get_move(board_t my_color, board_t other_color, int ply) {
     board_t possible_moves[MAX_MOVES];
-////    int num_moves = find_possible_moves(my_color, other_color, possible_moves);
-//
-////    fprintf(stderr, "Current board: \n");
-//    char out[512];
-////    visualize_board(out, "MO", my_color, other_color);
-////    fputs(out, stderr);
-//
-//    board_to_hex(out, my_color);
-//    board_to_hex(out+33, other_color);
-//    out[32] = ' ';
-//    out[64] = '\n';
-//    out[65] = '\0';
-//    fputs(out, stderr);
 
     int num_moves;
 
-    num_moves = best_negamax_moves(my_color, other_color, possible_moves, round);
+    num_moves = best_negamax_moves(my_color, other_color, possible_moves, ply);
 
     num_moves = prefer_outside_to_inside_moves(my_color, possible_moves, num_moves);
     fprintf(stderr, "Found %d moves after filtering\n", num_moves);
@@ -102,7 +89,7 @@ void game_loop(FILE * fp) {
     char trace[256][10];
     int num_trace = 0;
 
-    int round = 0;
+    int ply = 0;
     while(getline(&line, &nbytes, fp))
     {
 #if USE_STATS
@@ -126,9 +113,9 @@ void game_loop(FILE * fp) {
         } else {
             move = read_move(line);
             othercolor ^= move;
+            ply++;
         }
-
-        move = get_move(mycolor, othercolor, round++);
+        move = get_move(mycolor, othercolor, ply++);
         write_move(out, mycolor & move, ~mycolor & move);
 
         mycolor ^= move;

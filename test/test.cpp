@@ -1,45 +1,36 @@
 #include <cstdint>
+#include <cstdio>
 
+typedef uint64_t hash_t;
 struct board_t {
     uint64_t hi;
     uint64_t low;
+};
 
-//    board_t (uint64_t hi, uint64_t low) : hi(hi), low(low) { }
+struct trans_node {
+    hash_t hash;
+    int16_t value;
+    uint16_t  flag : 3;
+    uint16_t depth : 5;
+    uint16_t round : 5;
+    uint16_t : 3;
 
-
-    board_t operator~() const {
-        return {~hi, ~low};
-    }
-
-    board_t operator^(const board_t& rhs) const {
-        return {hi ^ rhs.hi, low ^ rhs.low};
-    }
-
-    board_t operator|(const board_t & rhs) const {
-        return {hi | rhs.hi, low | rhs.low};
-    }
-
-    board_t operator&(const board_t & rhs) const {
-        return {hi & rhs.hi, low & rhs.low};
-    }
-
-    board_t& operator|=(const board_t & rhs) {
-        hi |= rhs.hi;
-        low |= rhs.low;
-
-        return *this;
-    }
-
-
+    trans_node * next;
+//
+//    board_t black;
+//    board_t white;
 };
 
 
 
 
 int main( int argc, const char* argv[] ) {
-    board_t board = {0x00aa8002aa000aa8 ,0x002aa000aa8002aa};
-    board_t board2 = board;
+    trans_node *t;
+    fprintf(stderr, "Size of board %d\n", sizeof(board_t));
+    fprintf(stderr, "Size of trans_node %d\n", sizeof(trans_node));
+    fprintf(stderr, "Size of *trans_node %d\n", sizeof(t));
 
+    fflush(stderr);
     return 0;
 
 }

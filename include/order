@@ -4,4 +4,6 @@ util.h
 print.h
 graph.h
 ayu.h
+hash.h
+transtable.h
 abpruning.h
