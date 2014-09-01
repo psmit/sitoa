@@ -36,7 +36,7 @@ struct stats {
     }
 
     void dump_last(FILE * fp) {
-        fprintf(fp, "Since last time: %.4f seconds; Nbs: %llu Negam: %llu Fmv: %llu Fsoldis: %llu P: %llu\nFindNei/second %.1f; Nodes/second %.1f;\n",
+        fprintf(fp, "# %.4f seconds; Nbs: %llu Negam: %llu Fmv: %llu Fsoldis: %llu P: %llu\n# FindNei/second %.1f; Nodes/second %.1f;\n",
         time_spent - prev_stats->time_spent,
         find_neighbours_count - prev_stats->find_neighbours_count,
         negamax_count - prev_stats->negamax_count,

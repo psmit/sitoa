@@ -9,7 +9,7 @@
 
 #define WIN_SCORE 10000
 
-#define NODES_PER_MOVE 10000000l
+#define NODES_PER_MOVE 100000000l
 #define DEPTH_BREAKER 1
 #define MAX_DEPTH 10
 
@@ -201,7 +201,7 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t * moves, 
     for (m = 0; m < num_possible_moves; ++m) {
         scores[m] = -negamax_memory(board_other, board_cur ^ moves[m], hash ^ rand_table[(board_cur & moves[m]).ctz()][ply % 2] ^ rand_table[(~board_cur & moves[m]).ctz()][ply % 2], depth, -beta, -alpha, ply + 1);
         best_score = max(best_score, scores[m]);
-//        alpha = max(best_score, alpha);
+        alpha = max(best_score, alpha);
     }
 
     int sel_moves = 0;
@@ -211,10 +211,21 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t * moves, 
         }
     }
 
-    fprintf(stderr, "%d nodes in table\n", STORAGE_ID);
-    fprintf(stderr, "best score %d\n", best_score);
+    fprintf(stderr, "# %d nodes in table\n", STORAGE_ID);
+    fprintf(stderr, "# best score %d\n", best_score);
 
-    return sel_moves;
+
+    char out[256];
+    out[0] = ply % 2 ? 'W' : 'B';
+    out[1] = ' ';
+    board_to_hex(out + 2, board_cur);
+    out[34] = ' ';
+    board_to_hex(out + 35, board_other);
+
+    sprintf(out + 67, " %d %d %d %d\n", depth, best_score, num_possible_moves, sel_moves);
+
+    fprintf(stderr, out);
+    return min(sel_moves, 1);
 }
 
 int negamax(board_t board_cur, board_t board_oth, int depth, int color) {

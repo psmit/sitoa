@@ -68,7 +68,7 @@ board_t get_move(board_t my_color, board_t other_color, int ply) {
     num_moves = best_negamax_moves(my_color, other_color, possible_moves, ply);
 
     num_moves = prefer_outside_to_inside_moves(my_color, possible_moves, num_moves);
-    fprintf(stderr, "Found %d moves after filtering\n", num_moves);
+//    fprintf(stderr, "Found %d moves after filtering\n", num_moves);
 
     return random_move(possible_moves, num_moves);
 }

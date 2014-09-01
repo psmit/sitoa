@@ -29,7 +29,7 @@ void init_rand(const char * s) {
 
     }
 
-    fprintf(stderr,"Rand init with seed %x\n", seed);
+    fprintf(stderr,"# Rand init with seed %x\n", seed);
 
     srand(seed);
 }
