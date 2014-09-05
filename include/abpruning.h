@@ -9,7 +9,7 @@
 
 #define WIN_SCORE 10000
 
-#define NODES_PER_MOVE 100000000l
+#define NODES_PER_MOVE 50000000l
 #define DEPTH_BREAKER 1
 #define MAX_DEPTH 10
 
