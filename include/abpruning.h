@@ -216,7 +216,7 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t * moves, 
 
 
     char out[256];
-    out[0] = ply % 2 ? 'W' : 'B';
+    out[0] = ply % 2 ? 'B' : 'W';
     out[1] = ' ';
     board_to_hex(out + 2, board_cur);
     out[34] = ' ';
@@ -224,7 +224,7 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t * moves, 
 
     sprintf(out + 67, " %d %d %d %d\n", depth, best_score, num_possible_moves, sel_moves);
 
-    fprintf(stderr, out);
+    fputs(out, stderr);
     return min(sel_moves, 1);
 }
 

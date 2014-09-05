@@ -147,5 +147,10 @@ int main( int argc, const char* argv[] )
     if (argc > 2) {
         fclose(fp);
     }
+
+#if USE_STATS
+        cleanup_stats();
+#endif
+
     return 0;
 }

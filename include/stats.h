@@ -63,4 +63,8 @@ void init_stats() {
     statistics.prev_stats = new stats();
 }
 
+void cleanup_stats() {
+    delete statistics.prev_stats;
+}
+
 #endif
