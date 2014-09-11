@@ -190,8 +190,8 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t * moves, 
         depth = max(depth, 1);
     }
 
-    fprintf(stderr, "Num moves %i depth %i \n", num_possible_moves, depth);
-    fflush(stderr);
+//    fprintf(stderr, "Num moves %i depth %i \n", num_possible_moves, depth);
+//    fflush(stderr);
 
     int m;
 
@@ -214,17 +214,6 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t * moves, 
     fprintf(stderr, "# %d nodes in table\n", STORAGE_ID);
     fprintf(stderr, "# best score %d\n", best_score);
 
-
-    char out[256];
-    out[0] = ply % 2 ? 'B' : 'W';
-    out[1] = ' ';
-    board_to_hex(out + 2, board_cur);
-    out[34] = ' ';
-    board_to_hex(out + 35, board_other);
-
-    sprintf(out + 67, " %d %d %d %d\n", depth, best_score, num_possible_moves, sel_moves);
-
-    fputs(out, stderr);
     return min(sel_moves, 1);
 }
 

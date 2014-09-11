@@ -9,7 +9,7 @@ include_directories (
 add_executable ( sitoa sitoa.cpp )
 
 set(TEST_CMDS test_print test_moves make_board test_articulation_points test_clusters test_possible_moves test_sol_distance
-test_trans_table test_negamax test_hash)
+test_trans_table test_negamax test_hash replay_log)
 foreach(TEST_CMD ${TEST_CMDS})
     add_executable ( ${TEST_CMD} tools/${TEST_CMD}.cpp )
 endforeach(TEST_CMD)

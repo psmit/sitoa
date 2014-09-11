@@ -95,13 +95,12 @@ void game_loop(FILE * fp) {
 #if USE_STATS
             statistics.resume();
 #endif
-//        trace[num_trace] = malloc(10);
         strcpy(trace[num_trace++], line);
         if (strcmp(line, "Start\n") == 0) {
             mycolor = B_WHITE_START;
             othercolor = B_BLACK_START;
         } else if (strcmp(line, "Quit\n") == 0) {
-            fprintf(stderr, "TRACE:\n");
+            fprintf(stderr, "#TRACE:\n");
             int t;
             for (t  = 0; t < num_trace; ++t) {
                 fputs(trace[t], stderr);
@@ -109,12 +108,19 @@ void game_loop(FILE * fp) {
 #if USE_STATS
             statistics.dump_total(stderr);
 #endif
-            return;
+            break;
         } else {
             move = read_move(line);
             othercolor ^= move;
             ply++;
         }
+        fprintf(stderr, LOG_FORMAT_STRING, ply,
+                ply % 2 ? 'B' : 'W',
+                ply % 2 ? othercolor.hi : mycolor.hi,
+                ply % 2 ? othercolor.low : mycolor.low,
+                ply % 2 ? mycolor.hi : othercolor.hi,
+                ply % 2 ? mycolor.low : othercolor.low);
+
         move = get_move(mycolor, othercolor, ply++);
         write_move(out, mycolor & move, ~mycolor & move);
 

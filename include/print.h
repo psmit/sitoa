@@ -1,8 +1,11 @@
 #pragma once
 
+#include <inttypes.h>
+
 #include "defs.h"
 #include "util.h"
 
+#define LOG_FORMAT_STRING "%d %c %016" PRIx64 "%016" PRIx64 " %016" PRIx64 "%016" PRIx64 "\n"
 #define MAX_ARGUMENTS 128
 
 board_t read_move(const char * in_string) {
