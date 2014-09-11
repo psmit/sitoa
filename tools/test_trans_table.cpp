@@ -1,5 +1,4 @@
-#include "ayu.h"
-#include "transtable.h"
+#include "headers.h"
 
 int visits = 0;
 int collision = 0;

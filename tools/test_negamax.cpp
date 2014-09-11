@@ -1,6 +1,4 @@
-#include "graph.h"
-#include "ayu.h"
-#include "abpruning.h"
+#include "headers.h"
 
 int main( int argc, const char* argv[] ) {
 

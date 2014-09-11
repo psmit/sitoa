@@ -1,17 +1,5 @@
 #pragma once
-
-#include "ayu.h"
-#include "defs.h"
-#include "util.h"
-
-#include "transtable.h"
-#include <cmath>
-
-#define WIN_SCORE 10000
-
-#define NODES_PER_MOVE 50000000l
-#define DEPTH_BREAKER 1
-#define MAX_DEPTH 10
+#include "headers.h"
 
 unsigned int INTERESTING_MOVE_COUNT[BOARD_SIZE* BOARD_SIZE* 2] = {0};
 const int MOVE_RANK[BOARD_SIZE* BOARD_SIZE* 2] = {

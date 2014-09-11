@@ -1,12 +1,5 @@
 #pragma once
-
-#include <inttypes.h>
-
-#include "defs.h"
-#include "util.h"
-
-#define LOG_FORMAT_STRING "%d %c %016" PRIx64 "%016" PRIx64 " %016" PRIx64 "%016" PRIx64 "\n"
-#define MAX_ARGUMENTS 128
+#include "headers.h"
 
 board_t read_move(const char * in_string) {
     char c_from, c_to;
@@ -103,10 +96,8 @@ void visualize_board_int(char * out_string, int * board) {
 void board_to_hex(char * out_string, board_t board) {
     // Use datatype that stores exactly 8 hex chars
 
-    sprintf(out_string, "%016llx", board.hi);
-    out_string += 16;
-    sprintf(out_string, "%016llx", board.low);
-    out_string += 16;
+    sprintf(out_string, BOARD_FORMAT_STRING, board.hi, board.low);
+    out_string += 32;
     *out_string = '\0';
 }
 

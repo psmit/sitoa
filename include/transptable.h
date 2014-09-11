@@ -1,13 +1,5 @@
 #pragma once
-#include "defs.h"
-#include "hash.h"
-
-#define HASH_TABLE_SIZE 1000000
-#define STORAGE_SIZE 3500000
-
-#define TRANS_EXACT 1
-#define TRANS_LOWER 2
-#define TRANS_HIGH 4
+#include "headers.h"
 
 struct trans_node {
     hash_t hash;

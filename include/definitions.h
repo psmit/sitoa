@@ -1,4 +1,5 @@
 #pragma once
+#include "headers.h"
 
 #include <cstdarg>
 #include <cstdint>
@@ -8,6 +9,27 @@
 #define BOARD_SIZE 11
 #define MAX_VERTICES 30
 #define MAX_MOVES 500
+
+#define BOARD_FORMAT_STRING "%016" PRIx64 "%016" PRIx64
+#define LOG_FORMAT_STRING "%d %c " BOARD_FORMAT_STRING " " BOARD_FORMAT_STRING "\n"
+
+#define MAX_ARGUMENTS 128
+
+#define WIN_SCORE 10000
+
+#define NODES_PER_MOVE 50000000l
+#define DEPTH_BREAKER 1
+#define MAX_DEPTH 10
+
+#define USE_STATS 1
+
+#define HASH_TABLE_SIZE 1000000
+#define STORAGE_SIZE 3500000
+
+#define TRANS_EXACT 1
+#define TRANS_LOWER 2
+#define TRANS_HIGH 4
+
 
 struct board_t {
     uint64_t hi;

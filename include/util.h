@@ -1,8 +1,5 @@
 #pragma once
-
-#include <cstdlib>
-#include <sys/time.h>
-
+#include "headers.h"
 
 int min(int a, int b){
     if (a < b) {

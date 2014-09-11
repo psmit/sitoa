@@ -1,6 +1,4 @@
-#include "defs.h"
-#include "print.h"
-
+#include "headers.h"
 
 int main( int argc, const char* argv[] ) {
 

@@ -1,10 +1,4 @@
-#include <inttypes.h>
-#include "defs.h"
-#include "ayu.h"
-#include "util.h"
-#include "abpruning.h"
-
-#include "stats.h"
+#include "headers.h"
 
 void test_loop(FILE * fp) {
     board_t white = B_WHITE_START;

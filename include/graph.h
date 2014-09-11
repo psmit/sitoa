@@ -1,8 +1,5 @@
 #pragma once
-#include "defs.h"
-#include "print.h"
-
-#include "stats.h"
+#include "headers.h"
 
 board_t find_neighbors(board_t board) {
 #if USE_STATS

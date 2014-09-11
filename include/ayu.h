@@ -1,8 +1,5 @@
 #pragma once
-#include "defs.h"
-#include "graph.h"
-
-#include "stats.h"
+#include "headers.h"
 
 board_t find_moves_targets(board_t source, board_t targets, board_t blockades) {
 //    targets ^= source;

@@ -1,9 +1,4 @@
-#include "defs.h"
-#include "ayu.h"
-#include "util.h"
-#include "abpruning.h"
-
-#include "stats.h"
+#include "headers.h"
 
 int prefer_outside_to_inside_moves(board_t my_board, board_t * moves, int num_moves) {
     int selected_moves = 0;

@@ -1,9 +1,5 @@
 #pragma once
-
-#include <cstdlib>
-#include <sys/time.h>
-
-#define USE_STATS true
+#include "headers.h"
 
 #if USE_STATS
 struct stats {

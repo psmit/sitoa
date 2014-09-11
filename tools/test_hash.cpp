@@ -1,5 +1,4 @@
-#include "ayu.h"
-#include "hash.h"
+#include "headers.h"
 
 int main( int argc, const char* argv[] ) {
     printf("%lu", init_hash(B_BLACK_START, B_WHITE_START));
