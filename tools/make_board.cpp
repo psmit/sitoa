@@ -1,7 +1,7 @@
 #include "headers.h"
 
 
-int main( int argc, const char* argv[] ) {
+int main(int argc, const char *argv[]) {
 
     char out[256];
 
@@ -12,7 +12,7 @@ int main( int argc, const char* argv[] ) {
     size_t nbytes = 0;
     char *line = NULL;
 
-    while(getline(&line, &nbytes, stdin)) {
+    while (getline(&line, &nbytes, stdin)) {
         if (strcmp(line, "Write\n") == 0) {
             visualize_board(out, "B", board);
             puts(out);

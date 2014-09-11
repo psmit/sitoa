@@ -1,18 +1,18 @@
 #include "headers.h"
 
-int prefer_outside_to_inside_moves(board_t my_board, board_t * moves, int num_moves) {
+int prefer_outside_to_inside_moves(board_t my_board, board_t *moves, int num_moves) {
     int selected_moves = 0;
     int c;
     int m;
     for (c = 0; c < BOARD_SIZE / 2 + 1; c++) {
-        for(m = 0; m < num_moves; ++m) {
-            if ((my_board & moves[m] & B_CIRCLES[c]) && (B_CIRCLES[c+1] & moves[m])) {
+        for (m = 0; m < num_moves; ++m) {
+            if ((my_board & moves[m] & B_CIRCLES[c]) && (B_CIRCLES[c + 1] & moves[m])) {
                 moves[selected_moves++] = moves[m];
             }
         }
         if (selected_moves) return selected_moves;
 
-        for(m = 0; m < num_moves; ++m) {
+        for (m = 0; m < num_moves; ++m) {
             if ((my_board & moves[m] & B_CIRCLES[c])) {
                 moves[selected_moves++] = moves[m];
             }
@@ -23,11 +23,11 @@ int prefer_outside_to_inside_moves(board_t my_board, board_t * moves, int num_mo
     return num_moves;
 }
 
-board_t random_move(board_t * moves, int num_moves) {
+board_t random_move(board_t *moves, int num_moves) {
     return moves[rand() % num_moves];
 }
 
-int score_and_filter_moves(board_t my_color, board_t other_color, board_t * moves, int num_moves) {
+int score_and_filter_moves(board_t my_color, board_t other_color, board_t *moves, int num_moves) {
     int scores[MAX_MOVES];
     int m;
 
@@ -68,7 +68,7 @@ board_t get_move(board_t my_color, board_t other_color, int ply) {
     return random_move(possible_moves, num_moves);
 }
 
-void game_loop(FILE * fp) {
+void game_loop(FILE *fp) {
 
 
     size_t nbytes = 0;
@@ -85,10 +85,9 @@ void game_loop(FILE * fp) {
     int num_trace = 0;
 
     int ply = 0;
-    while(getline(&line, &nbytes, fp))
-    {
+    while (getline(&line, &nbytes, fp)) {
 #if USE_STATS
-            statistics.resume();
+        statistics.resume();
 #endif
         strcpy(trace[num_trace++], line);
         if (strcmp(line, "Start\n") == 0) {
@@ -97,7 +96,7 @@ void game_loop(FILE * fp) {
         } else if (strcmp(line, "Quit\n") == 0) {
             fprintf(stderr, "#TRACE:\n");
             int t;
-            for (t  = 0; t < num_trace; ++t) {
+            for (t = 0; t < num_trace; ++t) {
                 fputs(trace[t], stderr);
             }
 #if USE_STATS
@@ -130,18 +129,17 @@ void game_loop(FILE * fp) {
     free(line);
 }
 
-int main( int argc, const char* argv[] )
-{
+int main(int argc, const char *argv[]) {
 
 #if USE_STATS
-        init_stats();
+    init_stats();
 #endif
 
     init_rand(argc > 1 ? argv[1] : "");
 
-    FILE * fp = stdin;
-    if(argc > 2) {
-        fp =fopen(argv[2], "r");
+    FILE *fp = stdin;
+    if (argc > 2) {
+        fp = fopen(argv[2], "r");
     }
     game_loop(fp);
 
@@ -150,7 +148,7 @@ int main( int argc, const char* argv[] )
     }
 
 #if USE_STATS
-        cleanup_stats();
+    cleanup_stats();
 #endif
 
     return 0;

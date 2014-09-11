@@ -1,6 +1,6 @@
 #include "headers.h"
 
-int main( int argc, const char* argv[] ) {
+int main(int argc, const char *argv[]) {
 
     board_t b = B_BLACK_START;
     board_t move;
@@ -14,7 +14,7 @@ int main( int argc, const char* argv[] ) {
     size_t nbytes = 0;
     char *line = NULL;
 
-    while(getline(&line, &nbytes, stdin)) {
+    while (getline(&line, &nbytes, stdin)) {
         move = read_move(line);
         write_move(out, b & move, ~b & move);
         puts(out);

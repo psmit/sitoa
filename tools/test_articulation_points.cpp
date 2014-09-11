@@ -1,8 +1,8 @@
 #include "headers.h"
 
-int main( int argc, const char* argv[] ) {
+int main(int argc, const char *argv[]) {
 
-    FILE * fp;
+    FILE *fp;
 
     fp = fopen(argv[1], "r");
 
@@ -13,7 +13,7 @@ int main( int argc, const char* argv[] ) {
 
     board_t board, articulation_points;
 
-    while(getline(&line, &nbytes, fp) != -1) {
+    while (getline(&line, &nbytes, fp) != -1) {
         board = hex_to_board(line);
         visualize_board(out, "B", board);
         puts(out);

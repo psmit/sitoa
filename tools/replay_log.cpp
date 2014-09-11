@@ -1,6 +1,6 @@
 #include "headers.h"
 
-void test_loop(FILE * fp) {
+void test_loop(FILE *fp) {
     board_t white = B_WHITE_START;
     board_t black = B_BLACK_START;
     char out[256];
@@ -16,7 +16,7 @@ void test_loop(FILE * fp) {
 }
 
 
-void replay_loop(FILE * fp) {
+void replay_loop(FILE *fp) {
 
     size_t nbytes = 0;
     char *line = NULL;
@@ -33,13 +33,12 @@ void replay_loop(FILE * fp) {
 
     int num_moves;
 
-    while(getline(&line, &nbytes, fp) > 0)
-    {
-        if(strlen(line) < 3) continue;
+    while (getline(&line, &nbytes, fp) > 0) {
+        if (strlen(line) < 3) continue;
 
         if (strncmp("Quit", line, 4) == 0 || strncmp("#TRACE", line, 6) == 0) {
             break;
-        } else if(line[0] == '#') {
+        } else if (line[0] == '#') {
             continue;
         } else if (sscanf(line, "Randseed %x", &seed)) {
             srand(seed);
@@ -50,7 +49,7 @@ void replay_loop(FILE * fp) {
             } else {
                 num_moves = best_negamax_moves(white, black, possible_moves, ply);
             }
-        } else  {
+        } else {
             puts("EROROROROROR");
             exit(1);
         }
@@ -60,11 +59,10 @@ void replay_loop(FILE * fp) {
 }
 
 
-int main( int argc, const char* argv[] )
-{
-    FILE * fp = stdin;
-    if(argc > 1) {
-        fp =fopen(argv[1], "r");
+int main(int argc, const char *argv[]) {
+    FILE *fp = stdin;
+    if (argc > 1) {
+        fp = fopen(argv[1], "r");
     }
     replay_loop(fp);
 

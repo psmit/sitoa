@@ -1,6 +1,6 @@
 #include "headers.h"
 
-int main( int argc, const char* argv[] ) {
+int main(int argc, const char *argv[]) {
 
     board_t b = B_BLACK_START;
     board_t w = B_WHITE_START;

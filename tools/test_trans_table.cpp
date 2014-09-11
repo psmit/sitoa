@@ -2,9 +2,10 @@
 
 int visits = 0;
 int collision = 0;
+
 void visit_recursive(board_t black, board_t white, hash_t hash, bool white_turn, int depth) {
     visits++;
-    trans_node * node = lookup(hash);
+    trans_node *node = lookup(hash);
 //    if(node->black) {
 //        if (node->black & ~black || node->white & ~white) {
 //            collision++;
@@ -39,15 +40,15 @@ void visit_recursive(board_t black, board_t white, hash_t hash, bool white_turn,
 
     for (m = 0; m < num_moves; m++) {
         if (white_turn) {
-            visit_recursive(black, white ^moves[m], hash ^ rand_table[(white & moves[m]).ctz()][1] ^ rand_table[(~white & moves[m]).ctz()][1], !white_turn, depth - 1);
+            visit_recursive(black, white ^ moves[m], hash ^ rand_table[(white & moves[m]).ctz()][1] ^ rand_table[(~white & moves[m]).ctz()][1], !white_turn, depth - 1);
         }
         else {
-            visit_recursive(black ^moves[m], white, hash ^ rand_table[(black & moves[m]).ctz()][0] ^ rand_table[(~black & moves[m]).ctz()][0], !white_turn, depth - 1);
+            visit_recursive(black ^ moves[m], white, hash ^ rand_table[(black & moves[m]).ctz()][0] ^ rand_table[(~black & moves[m]).ctz()][0], !white_turn, depth - 1);
         }
     }
 }
 
-int main( int argc, const char* argv[] ) {
+int main(int argc, const char *argv[]) {
 
     board_t black = B_BLACK_START;
     board_t white = B_WHITE_START;

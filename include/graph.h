@@ -1,9 +1,10 @@
 #pragma once
+
 #include "headers.h"
 
 board_t find_neighbors(board_t board) {
 #if USE_STATS
-        statistics.find_neighbours_count++;
+    statistics.find_neighbours_count++;
 #endif
     // initialize neighbors with board to be able to filter them on the end
     board_t neighbors = board;
@@ -32,7 +33,7 @@ int find_clusters(board_t board, board_t clusters[MAX_VERTICES]) {
     board_t neighbors;
     int num_clusters = 0;
 
-    while(board) {
+    while (board) {
         //initialize cluster with first stone
         cluster = board.lso();
         //remove stones in cluster from board
@@ -60,8 +61,8 @@ int find_clusters(board_t board, board_t clusters[MAX_VERTICES]) {
 }
 
 
-void find_articulation_points_recursive(board_t graph, board_t un, int ui, int * time, board_t * visited, int disc[BOARD_SIZE * BOARD_SIZE],
-        int low[BOARD_SIZE * BOARD_SIZE], int parent[BOARD_SIZE * BOARD_SIZE], board_t * articulation_points) {
+void find_articulation_points_recursive(board_t graph, board_t un, int ui, int *time, board_t *visited, int disc[BOARD_SIZE * BOARD_SIZE],
+        int low[BOARD_SIZE * BOARD_SIZE], int parent[BOARD_SIZE * BOARD_SIZE], board_t *articulation_points) {
 
     int children = 0;
 
@@ -74,15 +75,15 @@ void find_articulation_points_recursive(board_t graph, board_t un, int ui, int *
     board_t nn;
     int ni;
 
-    while(neighbors) {
+    while (neighbors) {
         nn = neighbors.lso();
         neighbors ^= nn;
 
         ni = nn.ctz();
 
-        if(! (nn & graph)) continue;
+        if (!(nn & graph)) continue;
 
-        if(nn & ~(*visited)) {
+        if (nn & ~(*visited)) {
             children++;
             parent[ni] = ui;
             find_articulation_points_recursive(graph, nn, ni, time, visited, disc, low, parent, articulation_points);
@@ -127,10 +128,10 @@ board_t find_articulation_points(board_t graph) {
 
     board_t wgraph = graph;
 
-    while(wgraph) {
+    while (wgraph) {
         un = wgraph.lso();
         wgraph ^= un;
-        if(un & ~visited) {
+        if (un & ~visited) {
             ui = un.ctz();
             find_articulation_points_recursive(graph, un, ui, &time, &visited, disc, low, parent, &articulation_points);
         }

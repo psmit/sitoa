@@ -1,6 +1,6 @@
 #include "headers.h"
 
-int main( int argc, const char* argv[] ) {
+int main(int argc, const char *argv[]) {
     printf("%lu", init_hash(B_BLACK_START, B_WHITE_START));
 
     board_t black = hex_to_board("000008210471c2218f15869053000000");
@@ -19,7 +19,7 @@ int main( int argc, const char* argv[] ) {
 
         hash_t new_hash = orig_hash ^
 
-        printf("%#010x\n", init_hash(black_new, white));
+                printf("%#010x\n", init_hash(black_new, white));
     }
     return 0;
 }

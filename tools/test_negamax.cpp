@@ -1,6 +1,6 @@
 #include "headers.h"
 
-int main( int argc, const char* argv[] ) {
+int main(int argc, const char *argv[]) {
 
 //    board_t black = hex_to_board("000008210471c2218b9506805100b000");
 //    board_t white = hex_to_board("007c01022a000c18002800040c8503fc");
