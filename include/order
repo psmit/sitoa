@@ -1,10 +1,12 @@
 includes.h
 definitions.h
+debug.h
 stats.h
 util.h
-io.h
 graph.h
 ayu.h
 hash.h
 transptable.h
+search_node.h
 search.h
+io.h

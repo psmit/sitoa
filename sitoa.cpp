@@ -1,125 +1,98 @@
+#include <search.h>
 #include "headers.h"
 
-int prefer_outside_to_inside_moves(board_t my_board, board_t *moves, int num_moves) {
-    int selected_moves = 0;
-    int c;
-    int m;
-    for (c = 0; c < BOARD_SIZE / 2 + 1; c++) {
-        for (m = 0; m < num_moves; ++m) {
-            if ((my_board & moves[m] & B_CIRCLES[c]) && (B_CIRCLES[c + 1] & moves[m])) {
-                moves[selected_moves++] = moves[m];
-            }
-        }
-        if (selected_moves) return selected_moves;
-
-        for (m = 0; m < num_moves; ++m) {
-            if ((my_board & moves[m] & B_CIRCLES[c])) {
-                moves[selected_moves++] = moves[m];
-            }
-        }
-        if (selected_moves) return selected_moves;
-    }
-
-    return num_moves;
-}
-
-board_t random_move(board_t *moves, int num_moves) {
-    return moves[rand() % num_moves];
-}
-
-int score_and_filter_moves(board_t my_color, board_t other_color, board_t *moves, int num_moves) {
-    int scores[MAX_MOVES];
-    int m;
-
-    fprintf(stderr, "Current score %d\n", find_solution_distance(my_color, other_color));
-
-
-    int best_score = BOARD_SIZE * BOARD_SIZE;
-    for (m = 0; m < num_moves; ++m) {
-        scores[m] = find_solution_distance(my_color ^ moves[m], other_color) - find_solution_distance(other_color, my_color ^ moves[m]);
-        if (scores[m] < best_score) {
-            best_score = scores[m];
-        }
-    }
-
-    fprintf(stderr, "Best score moves %d\n", best_score);
-
-    int filtered_moves = 0;
-    for (m = 0; m < num_moves; ++m) {
-        if (scores[m] == best_score) {
-            moves[filtered_moves++] = moves[m];
-        }
-    }
-
-    return filtered_moves;
-}
-
-
-board_t get_move(board_t my_color, board_t other_color, int ply) {
-    board_t possible_moves[MAX_MOVES];
-
-    int num_moves;
-
-    num_moves = best_negamax_moves(my_color, other_color, possible_moves, ply);
-
-    num_moves = prefer_outside_to_inside_moves(my_color, possible_moves, num_moves);
-//    fprintf(stderr, "Found %d moves after filtering\n", num_moves);
-
-    return random_move(possible_moves, num_moves);
-}
 
 void game_loop(FILE *fp) {
-
-
     size_t nbytes = 0;
     char *line = NULL;
 
-    board_t mycolor = B_BLACK_START;
-    board_t othercolor = B_WHITE_START;
+    search_node sn = {B_WHITE_START, B_BLACK_START, init_hash(B_BLACK_START, B_WHITE_START), 0};
 
     board_t move;
-
+    int score;
+    int debug = 0;
     char out[256];
 
     char trace[256][10];
     int num_trace = 0;
 
-    int ply = 0;
+    int ply;
+    int d,s;
+    board_t white, black;
+    unsigned int seed;
+    int depth = 1;
+
+
     while (getline(&line, &nbytes, fp)) {
-#if USE_STATS
+#ifdef USE_STATS
         statistics.resume();
 #endif
         strcpy(trace[num_trace++], line);
-        if (strcmp(line, "Start\n") == 0) {
-            mycolor = B_WHITE_START;
-            othercolor = B_BLACK_START;
-        } else if (strcmp(line, "Quit\n") == 0) {
-            fprintf(stderr, "#TRACE:\n");
-            int t;
-            for (t = 0; t < num_trace; ++t) {
-                fputs(trace[t], stderr);
-            }
-#if USE_STATS
+        if (read_move(line, &move)) {
+            sn = sn_apply_move(sn, move);
+        } else if (read_quit(line)) {
             statistics.dump_total(stderr);
-#endif
             break;
+        } else if (read_start(line)) {
+
+        } else if (read_comment(line) || read_debug(line, &debug)) {
+            continue;
+        } else if (read_logstring(line, &sn, &d, &s)) {
+            depth = d;
+        } else if (read_randseed(line, &seed)) {
+            srand(seed);
+            continue;
+        } else if (read_log(line)) {
+            fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
+                    sn.white.hi,
+                    sn.white.low,
+                    sn.black.hi,
+                    sn.black.low,
+                    depth,
+                    score);
+            continue;
+        } else if (read_dump(line)) {
+            sn_dump(stderr, &sn);
+            continue;
         } else {
-            move = read_move(line);
-            othercolor ^= move;
-            ply++;
+            fprintf(stderr, "Unknown line: %s", line);
+            continue;
         }
-        fprintf(stderr, LOG_FORMAT_STRING, ply,
-                ply % 2 ? 'B' : 'W',
-                ply % 2 ? othercolor.hi : mycolor.hi,
-                ply % 2 ? othercolor.low : mycolor.low,
-                ply % 2 ? mycolor.hi : othercolor.hi,
-                ply % 2 ? mycolor.low : othercolor.low);
 
-        move = get_move(mycolor, othercolor, ply++);
-        write_move(out, mycolor & move, ~mycolor & move);
+        if (debug) {
+            sn_dump(stderr, &sn);
+        }
 
-        mycolor ^= move;
-#if USE_STATS
+
+//        depth = 1;
+//        board_t moves[MAX_MOVES];
+//        int num_possible_moves = sn_find_moves(&sn, moves);
+//
+//        if (num_possible_moves > 1) {
+//            depth = (int)(log((double) NODES_PER_MOVE) / log((double) num_possible_moves + DEPTH_BREAKER)) -1;
+//            depth = max(depth, 1);
+//        }
+//        depth = 1;
+
+        move = negamax_ab_decision(sn, depth, &score);
+
+        fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
+                sn.white.hi,
+                sn.white.low,
+                sn.black.hi,
+                sn.black.low,
+                depth,
+                score);
+
+        write_move(out, (sn.white | sn.black) & move, ~(sn.white | sn.black) & move);
+
+        sn = sn_apply_move(sn, move);
+
+        if (debug) {
+            sn_dump(stderr, &sn);
+        }
+
+#ifdef USE_STATS
         statistics.pause();
         statistics.dump_last(stderr);
 #endif
@@ -131,7 +104,7 @@ void game_loop(FILE *fp) {
 
 int main(int argc, const char *argv[]) {
 
-#if USE_STATS
+#ifdef USE_STATS
     init_stats();
 #endif
 
@@ -147,7 +120,7 @@ int main(int argc, const char *argv[]) {
         fclose(fp);
     }
 
-#if USE_STATS
+#ifdef USE_STATS
     cleanup_stats();
 #endif
 

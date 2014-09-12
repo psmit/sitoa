@@ -2,7 +2,7 @@
 
 #include "headers.h"
 
-#if USE_STATS
+#ifdef USE_STATS
 
 struct stats {
 

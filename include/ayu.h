@@ -31,7 +31,7 @@ board_t find_moves_targets(board_t source, board_t targets, board_t blockades) {
 }
 
 int find_possible_moves(board_t board_mover, board_t board_other, board_t *moves) {
-#if USE_STATS
+#ifdef USE_STATS
     statistics.find_moves_count++;
 #endif
 
@@ -85,7 +85,7 @@ int find_possible_moves(board_t board_mover, board_t board_other, board_t *moves
 }
 
 int find_solution_distance(board_t board, board_t other) {
-#if USE_STATS
+#ifdef USE_STATS
     statistics.find_solution_distance_count++;
 #endif
 

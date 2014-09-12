@@ -32,68 +32,12 @@ int compare_moves(const void *a, const void *b) {
 }
 
 
-void print_stuff_tostderr(board_t black, board_t white) {
-    char out[1024];
-    visualize_board(out, "BW", black, white);
-    fputs(out, stderr);
-    fprintf(stderr, "\nBlack solution distance: %d\n", find_solution_distance(black, white));
-    fprintf(stderr, "White solution distance: %d\n", find_solution_distance(white, black));
-
-}
-
-
-int negamax_ab(board_t board_cur, board_t board_oth, int depth, int alpha, int beta) {
-#if USE_STATS
-    ++statistics.negamax_count;
-#endif
-
-
-    if (depth == 0) {
-        return find_solution_distance(board_oth, board_cur) - find_solution_distance(board_cur, board_oth);
-    }
-
-    board_t moves[MAX_MOVES];
-    int num_moves = find_possible_moves(board_cur, board_oth, moves);
-
-    if (num_moves == 0) {
-        return WIN_SCORE;
-    }
-
-    shuffle(moves, num_moves);
-    qsort(moves, num_moves, sizeof(board_t), compare_moves);
-
-    int m;
-    int best_value = -WIN_SCORE * 2;
-    for (m = 0; m < num_moves; ++m) {
-        best_value = max(best_value, -negamax_ab(board_oth, board_cur ^ moves[m], depth - 1, -beta, -alpha));
-        alpha = max(best_value, alpha);
-        if (alpha >= beta) {
-#if USE_STATS
-            ++statistics.prunes;
-#endif
-            INTERESTING_MOVE_COUNT[move_to_index(moves[m])]++;
-            break;
-        }
-    }
-
-    return best_value;
-}
-
-int negamax_memory(board_t board_cur, board_t board_oth, hash_t hash, int depth, int alpha, int beta, int ply) {
-#if USE_STATS
-    ++statistics.negamax_count;
-#endif
-
-//    hash_t test_hash = ply % 2 ? init_hash(board_cur, board_oth) : init_hash(board_oth, board_cur);
-//
-//    printf("%#010x %#010x\n", hash, test_hash);
-//    fflush(stdout);
-
+int negamax_memory_rec(search_node snode, int depth, int alpha, int beta) {
     int alpha_orig = alpha;
 
-    trans_node *node = lookup(hash);
+    trans_node *node = lookup(snode.hash);
     if (node != nullptr && node->flag) {
-        if (node->depth >= depth && node->round >= ply) {
+        if (node->depth >= depth && node->round >= snode.ply) {
             if (node->flag & TRANS_EXACT) {
                 return node->value;
             } else if (node->flag & TRANS_LOWER) {
@@ -107,15 +51,13 @@ int negamax_memory(board_t board_cur, board_t board_oth, hash_t hash, int depth,
     if (alpha >= beta) {
         return alpha;
     }
-    hash_t hashp;
-
 
     if (depth == 0) {
-        return find_solution_distance(board_oth, board_cur) - find_solution_distance(board_cur, board_oth);
+        return sn_score(&snode);
     }
 
     board_t moves[MAX_MOVES];
-    int num_moves = find_possible_moves(board_cur, board_oth, moves);
+    int num_moves = sn_find_moves(&snode, moves);
 
     if (num_moves == 0) {
         return WIN_SCORE;
@@ -127,15 +69,9 @@ int negamax_memory(board_t board_cur, board_t board_oth, hash_t hash, int depth,
     int m;
     int best_value = -WIN_SCORE * 2;
     for (m = 0; m < num_moves; ++m) {
-
-        hashp = hash ^ rand_table[(board_cur & moves[m]).ctz()][ply % 2] ^ rand_table[(~board_cur & moves[m]).ctz()][ply % 2];
-
-        best_value = max(best_value, -negamax_memory(board_oth, board_cur ^ moves[m], hashp, depth - 1, -beta, -alpha, ply + 1));
+        best_value = max(best_value, -negamax_memory_rec(sn_apply_move(snode, moves[m]), depth - 1, -beta, -alpha));
         alpha = max(best_value, alpha);
         if (alpha >= beta) {
-#if USE_STATS
-            ++statistics.prunes;
-#endif
             INTERESTING_MOVE_COUNT[move_to_index(moves[m])]++;
             break;
         }
@@ -144,7 +80,7 @@ int negamax_memory(board_t board_cur, board_t board_oth, hash_t hash, int depth,
     if (node) {
         node->value = best_value;
         node->depth = depth;
-        node->round = ply;
+        node->round = snode.ply;
         if (best_value <= alpha_orig) {
             node->flag = TRANS_HIGH;
         } else if (best_value >= beta) {
@@ -153,67 +89,49 @@ int negamax_memory(board_t board_cur, board_t board_oth, hash_t hash, int depth,
             node->flag = TRANS_EXACT;
         }
     }
+
     return best_value;
-}
+};
 
+int negamax_ab_rec(search_node node, int depth, int alpha, int beta) {
 
-int best_negamax_moves(board_t board_cur, board_t board_other, board_t *moves, int ply) {
-    int depth;
-
-    int num_possible_moves = 0;
-    int scores[MAX_MOVES];
-
-    hash_t hash = ply % 2 ? init_hash(board_cur, board_other) : init_hash(board_other, board_cur);
-//    hash_t hash = ply % 2 ? init_hash(board_other, board_cur) : init_hash(board_cur, board_other);
-
-    num_possible_moves = find_possible_moves(board_cur, board_other, moves);
-    shuffle(moves, num_possible_moves);
-    qsort(moves, num_possible_moves, sizeof(board_t), compare_moves);
-
-    depth = 1;
-
-    if (num_possible_moves > 1) {
-        depth = (int) (log((double) NODES_PER_MOVE) / log((double) num_possible_moves + DEPTH_BREAKER)) - 1;
-        depth = max(depth, 1);
-    }
-
-//    fprintf(stderr, "Num moves %i depth %i \n", num_possible_moves, depth);
-//    fflush(stderr);
-
-    int m;
-
-    int best_score = -WIN_SCORE;
-    int beta = WIN_SCORE;
-    int alpha = -WIN_SCORE;
-    for (m = 0; m < num_possible_moves; ++m) {
-        scores[m] = -negamax_memory(board_other, board_cur ^ moves[m], hash ^ rand_table[(board_cur & moves[m]).ctz()][ply % 2] ^ rand_table[(~board_cur & moves[m]).ctz()][ply % 2], depth, -beta, -alpha, ply + 1);
-        best_score = max(best_score, scores[m]);
-        alpha = max(best_score, alpha);
-    }
-
-    int sel_moves = 0;
-    for (m = 0; m < num_possible_moves; ++m) {
-        if (scores[m] == best_score) {
-            moves[sel_moves++] = moves[m];
-        }
-    }
-
-    fprintf(stderr, "# %d nodes in table\n", STORAGE_ID);
-    fprintf(stderr, "# best score %d\n", best_score);
-
-    return min(sel_moves, 1);
-}
-
-int negamax(board_t board_cur, board_t board_oth, int depth, int color) {
-#if USE_STATS
-    ++statistics.negamax_count;
-#endif
     if (depth == 0) {
-        return find_solution_distance(board_oth, board_cur) - find_solution_distance(board_cur, board_oth);
+        return sn_score(&node);
     }
 
     board_t moves[MAX_MOVES];
-    int num_moves = find_possible_moves(board_cur, board_oth, moves);
+    int num_moves = sn_find_moves(&node, moves);
+
+    if (num_moves == 0) {
+        return WIN_SCORE;
+    }
+
+    shuffle(moves, num_moves);
+    qsort(moves, num_moves, sizeof(board_t), compare_moves);
+
+    int m;
+    int best_value = -WIN_SCORE * 2;
+
+    for (m = 0; m < num_moves; ++m) {
+        best_value = max(best_value, -negamax_ab_rec(sn_apply_move(node, moves[m]), depth - 1, -beta, -alpha));
+        alpha = max(best_value, alpha);
+        if (alpha >= beta) {
+            INTERESTING_MOVE_COUNT[move_to_index(moves[m])]++;
+            break;
+        }
+    }
+
+    return best_value;
+};
+
+
+int negamax_rec(search_node node, int depth) {
+    if (depth == 0) {
+        return sn_score(&node);
+    }
+
+    board_t moves[MAX_MOVES];
+    int num_moves = sn_find_moves(&node, moves);
 
     if (num_moves == 0) {
         return WIN_SCORE;
@@ -221,9 +139,99 @@ int negamax(board_t board_cur, board_t board_oth, int depth, int color) {
 
     int m;
     int best_value = -WIN_SCORE * 2;
+
     for (m = 0; m < num_moves; ++m) {
-        best_value = max(best_value, -negamax(board_oth, board_cur ^ moves[m], depth - 1, -color));
+        best_value = max(best_value, -negamax_rec(sn_apply_move(node, moves[m]), depth-1));
     }
 
     return best_value;
+};
+
+board_t negamax_decision(search_node node, int depth, int * move_score) {
+
+    board_t moves[MAX_MOVES];
+
+    int num_possible_moves = sn_find_moves(&node, moves);
+
+    shuffle(moves, num_possible_moves);
+    qsort(moves, num_possible_moves, sizeof(board_t), compare_moves);
+
+    int m;
+
+    int best_score = -WIN_SCORE;
+    int score;
+    board_t best_move = B_EMPTY;
+
+    for (m = 0; m < num_possible_moves; ++m) {
+        score = -negamax_rec(sn_apply_move(node, moves[m]), depth);
+        if (score > best_score) {
+            best_score = score;
+            best_move = moves[m];
+        }
+    }
+
+    *move_score = best_score;
+    return best_move;
+}
+
+board_t negamax_ab_decision(search_node node, int depth, int * move_score) {
+    board_t moves[MAX_MOVES];
+
+    int num_possible_moves = sn_find_moves(&node, moves);
+
+    shuffle(moves, num_possible_moves);
+    qsort(moves, num_possible_moves, sizeof(board_t), compare_moves);
+
+    int m;
+
+    int best_score = -WIN_SCORE;
+    int score;
+    board_t best_move = B_EMPTY;
+
+    int beta = WIN_SCORE;
+    int alpha = -WIN_SCORE;
+
+    for (m = 0; m < num_possible_moves; ++m) {
+        score = -negamax_ab_rec(sn_apply_move(node, moves[m]), depth, -beta, -alpha);
+        if (score > best_score) {
+            best_score = score;
+            best_move = moves[m];
+        }
+    }
+
+    *move_score = best_score;
+    return best_move;
+}
+
+board_t negamax_memory_decision(search_node node, int depth, int * move_score ) {
+    board_t moves[MAX_MOVES];
+
+    int num_possible_moves = sn_find_moves(&node, moves);
+
+    shuffle(moves, num_possible_moves);
+    qsort(moves, num_possible_moves, sizeof(board_t), compare_moves);
+
+    int m;
+
+    int best_score = -WIN_SCORE;
+    int score;
+    board_t best_move = B_EMPTY;
+
+    int beta = WIN_SCORE;
+    int alpha = -WIN_SCORE;
+
+    for (m = 0; m < num_possible_moves; ++m) {
+        score = -negamax_memory_rec(sn_apply_move(node, moves[m]), depth, -beta, -alpha);
+        if (score > best_score) {
+            best_score = score;
+            best_move = moves[m];
+        }
+    }
+
+    *move_score = best_score;
+    return best_move;
+}
+
+board_t mdf_decision(search_node node, int depth, int * move_score) {
+    return B_EMPTY;
 }
