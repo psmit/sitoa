@@ -157,7 +157,7 @@ int negamax_memory(board_t board_cur, board_t board_oth, hash_t hash, int depth,
 }
 
 
-int best_negamax_moves(board_t board_cur, board_t board_other, board_t *moves, int ply) {
+int best_negamax_moves(board_t board_cur, board_t board_other, board_t *moves, int ply, int * d, int * s) {
     int depth;
 
     int num_possible_moves = 0;
@@ -176,6 +176,7 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t *moves, i
         depth = (int) (log((double) NODES_PER_MOVE) / log((double) num_possible_moves + DEPTH_BREAKER)) - 1;
         depth = max(depth, 1);
     }
+    *d = depth;
 
 //    fprintf(stderr, "Num moves %i depth %i \n", num_possible_moves, depth);
 //    fflush(stderr);
@@ -198,6 +199,7 @@ int best_negamax_moves(board_t board_cur, board_t board_other, board_t *moves, i
         }
     }
 
+    *s = best_score;
     fprintf(stderr, "# %d nodes in table\n", STORAGE_ID);
     fprintf(stderr, "# best score %d\n", best_score);
 

@@ -34,15 +34,10 @@ struct stats {
     }
 
     void dump_last(FILE *fp) {
-        fprintf(fp, "# %.4f seconds; Nbs: %llu Negam: %llu Fmv: %llu Fsoldis: %llu P: %llu\n# FindNei/second %.1f; Nodes/second %.1f;\n",
-                time_spent - prev_stats->time_spent,
-                find_neighbours_count - prev_stats->find_neighbours_count,
-                negamax_count - prev_stats->negamax_count,
-                find_moves_count - prev_stats->find_moves_count,
-                find_solution_distance_count - prev_stats->find_solution_distance_count,
-                prunes - prev_stats->prunes,
-                (find_neighbours_count - prev_stats->find_neighbours_count) / (time_spent - prev_stats->time_spent),
-                (negamax_count - prev_stats->negamax_count) / (time_spent - prev_stats->time_spent)
+//        fprintf(fp, "# %.4f seconds; Nbs: %llu Negam: %llu Fmv: %llu Fsoldis: %llu P: %llu\n# FindNei/second %.1f; Nodes/second %.1f;\n",
+        fprintf(fp, "# %.4f seconds\n",
+
+                time_spent - prev_stats->time_spent
         );
     }
 

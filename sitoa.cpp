@@ -55,12 +55,12 @@ int score_and_filter_moves(board_t my_color, board_t other_color, board_t *moves
 }
 
 
-board_t get_move(board_t my_color, board_t other_color, int ply) {
+board_t get_move(board_t my_color, board_t other_color, int ply, int * depth, int * score) {
     board_t possible_moves[MAX_MOVES];
 
     int num_moves;
 
-    num_moves = best_negamax_moves(my_color, other_color, possible_moves, ply);
+    num_moves = best_negamax_moves(my_color, other_color, possible_moves, ply, depth, score);
 
     num_moves = prefer_outside_to_inside_moves(my_color, possible_moves, num_moves);
 //    fprintf(stderr, "Found %d moves after filtering\n", num_moves);
@@ -85,6 +85,7 @@ void game_loop(FILE *fp) {
     int num_trace = 0;
 
     int ply = 0;
+    int d, s;
     while (getline(&line, &nbytes, fp)) {
 #if USE_STATS
         statistics.resume();
@@ -108,14 +109,15 @@ void game_loop(FILE *fp) {
             othercolor ^= move;
             ply++;
         }
+        move = get_move(mycolor, othercolor, ply, &d, &s);
         fprintf(stderr, LOG_FORMAT_STRING, ply,
-                ply % 2 ? 'B' : 'W',
                 ply % 2 ? othercolor.hi : mycolor.hi,
                 ply % 2 ? othercolor.low : mycolor.low,
                 ply % 2 ? mycolor.hi : othercolor.hi,
-                ply % 2 ? mycolor.low : othercolor.low);
+                ply % 2 ? mycolor.low : othercolor.low, d , s);
+        fflush(stderr);
+        ply++;
 
-        move = get_move(mycolor, othercolor, ply++);
         write_move(out, mycolor & move, ~mycolor & move);
 
         mycolor ^= move;
