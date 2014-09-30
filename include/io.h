@@ -31,7 +31,7 @@ int read_logstring(const char * line, search_node *sn, int * depth, int * score)
 }
 
 int read_move(const char * line, board_t * move) {
-    unsigned char c_from, c_to;
+    char c_from, c_to;
     int i_from, i_to;
     if (sscanf(line, "%c%d-%c%d", &c_from, &i_from, &c_to, &i_to) == 4) {
         *move = B_SINGLE_BIT[(c_from - 'A') + (i_from - 1) * BOARD_SIZE] | B_SINGLE_BIT[(c_to - 'A') + (i_to - 1) * BOARD_SIZE];

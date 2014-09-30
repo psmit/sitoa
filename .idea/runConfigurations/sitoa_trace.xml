@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="sitoa trace" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="77667e8 tools/data/trace1" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="sitoa" TARGET_NAME="sitoa" CONFIG_NAME="Debug">
-    <envs />
-    <method />
-  </configuration>
-</component>

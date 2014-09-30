@@ -16,16 +16,11 @@ int max(int a, int b) {
     return b;
 }
 
-void init_rand(const char *s) {
-    unsigned int seed;
-    if (strlen(s) > 0) {
-        seed = strtoul(s, NULL, 16);
-    }
-    else {
+void init_rand(unsigned int seed) {
+    if (seed == 0) {
         struct timeval time;
         gettimeofday(&time, NULL);
         seed = (time.tv_sec * 1000) + (time.tv_usec / 1000);
-
     }
 
     fprintf(stderr, "Randseed %x\n", seed);

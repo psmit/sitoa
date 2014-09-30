@@ -23,7 +23,7 @@ void game_loop(FILE *fp) {
     int depth = 1;
 
 
-    while (getline(&line, &nbytes, fp)) {
+    while (getline(&line, &nbytes, fp) > 0) {
 #ifdef USE_STATS
         statistics.resume();
 #endif
@@ -41,6 +41,7 @@ void game_loop(FILE *fp) {
             depth = d;
         } else if (read_randseed(line, &seed)) {
             srand(seed);
+            fprintf(stderr, "Randseed %x\n", seed);
             continue;
         } else if (read_log(line)) {
             fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
@@ -74,6 +75,7 @@ void game_loop(FILE *fp) {
 //        }
 //        depth = 1;
 
+//        move = negamax_memory_decision(sn, depth, &score);
         move = negamax_ab_decision(sn, depth, &score);
 
         fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
@@ -108,15 +110,15 @@ int main(int argc, const char *argv[]) {
     init_stats();
 #endif
 
-    init_rand(argc > 1 ? argv[1] : "");
+    init_rand(0);
 
     FILE *fp = stdin;
-    if (argc > 2) {
-        fp = fopen(argv[2], "r");
+    if (argc > 1) {
+        fp = fopen(argv[1], "r");
     }
     game_loop(fp);
 
-    if (argc > 2) {
+    if (argc > 1) {
         fclose(fp);
     }
 
