@@ -9,7 +9,8 @@
 
 #define BOARD_SIZE 11
 #define MAX_VERTICES 30
-#define MAX_MOVES 500
+#define MAX_MOVES 120
+#define MAX_PLYS 120
 
 #define BOARD_FORMAT_STRING "%016" PRIx64 "%016" PRIx64
 #define LOG_FORMAT_STRING "%d " BOARD_FORMAT_STRING " " BOARD_FORMAT_STRING " %d %d\n"
@@ -28,6 +29,9 @@
 #define TRANS_EXACT 1
 #define TRANS_LOWER 2
 #define TRANS_HIGH 4
+
+#define C_WHITE 0
+#define C_BLACK 1
 
 
 struct board_t {

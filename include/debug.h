@@ -1,6 +1,7 @@
 #pragma once
 
 #include "headers.h"
+
 void visualize_board(char *out_string, const char *print_chars, ...) {
     // The size of out_string should be BOARD_SIZE * (BOARD_SIZE + 1) + 1 or bigger
 

@@ -2,10 +2,7 @@
 
 #include "headers.h"
 
-#ifdef USE_STATS
-
 struct stats {
-
     stats *prev_stats;
     double time_spent;
 
@@ -64,5 +61,3 @@ void init_stats() {
 void cleanup_stats() {
     delete statistics.prev_stats;
 }
-
-#endif

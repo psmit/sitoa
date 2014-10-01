@@ -1,7 +1,6 @@
 #pragma once
 
 #include "includes.h"
-#define USE_STATS
 #include "definitions.h"
 #include "debug.h"
 #include "stats.h"

@@ -3,9 +3,8 @@
 #include "headers.h"
 
 board_t find_neighbors(board_t board) {
-#ifdef USE_STATS
     statistics.find_neighbours_count++;
-#endif
+
     // initialize neighbors with board to be able to filter them on the end
     board_t neighbors = board;
     // create working board b
@@ -28,10 +27,9 @@ board_t find_neighbors(board_t board) {
     return neighbors ^ board;
 }
 
-int find_clusters(board_t board, board_t clusters[MAX_VERTICES]) {
+int find_clusters(board_t board, board_t clusters[MAX_VERTICES], int num_clusters) {
     board_t cluster;
     board_t neighbors;
-    int num_clusters = 0;
 
     while (board) {
         //initialize cluster with first stone
@@ -105,8 +103,6 @@ void find_articulation_points_recursive(board_t graph, board_t un, int ui, int *
 }
 
 board_t find_articulation_points(board_t graph) {
-    // max vertices = 30
-
     int parent[BOARD_SIZE * BOARD_SIZE];
     int disc[BOARD_SIZE * BOARD_SIZE];
     int low[BOARD_SIZE * BOARD_SIZE];

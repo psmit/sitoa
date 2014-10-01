@@ -8,14 +8,12 @@ include_directories (
 )
 add_executable ( sitoa sitoa.cpp )
 
-set(TEST_CMDS make_board)
-foreach(TEST_CMD ${TEST_CMDS})
-    add_executable ( ${TEST_CMD} tools/${TEST_CMD}.cpp )
-endforeach(TEST_CMD)
+#set(TEST_CMDS make_board)
+#foreach(TEST_CMD ${TEST_CMDS})
+#    add_executable ( ${TEST_CMD} tools/${TEST_CMD}.cpp )
+#endforeach(TEST_CMD)
 
 FILE (GLOB_RECURSE clion_all_headers ${CMAKE_SOURCE_DIR}/include/*.h)
 ADD_CUSTOM_TARGET(all_clion
     SOURCES ${clion_all_headers}
 )
-
-add_executable (test test/test.cpp )

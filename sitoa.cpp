@@ -3,31 +3,27 @@
 
 
 void game_loop(FILE *fp) {
+    board_t move;
+
+    int debug = 0;
+
+    char out[256];
+
+    int depth;
+    int score;
+
+    unsigned int seed;
+
+    search_node sn;
+    sn_init(&sn, B_WHITE_START, B_BLACK_START, 0);
+
+    // getline variables
     size_t nbytes = 0;
     char *line = NULL;
 
-    search_node sn = {B_WHITE_START, B_BLACK_START, init_hash(B_BLACK_START, B_WHITE_START), 0};
-
-    board_t move;
-    int score;
-    int debug = 0;
-    char out[256];
-
-    char trace[256][10];
-    int num_trace = 0;
-
-    int ply;
-    int d,s;
-    board_t white, black;
-    unsigned int seed;
-    int depth = 1;
-
-
     while (getline(&line, &nbytes, fp) > 0) {
-#ifdef USE_STATS
+        depth = 0;
         statistics.resume();
-#endif
-        strcpy(trace[num_trace++], line);
         if (read_move(line, &move)) {
             sn = sn_apply_move(sn, move);
         } else if (read_quit(line)) {
@@ -37,8 +33,8 @@ void game_loop(FILE *fp) {
 
         } else if (read_comment(line) || read_debug(line, &debug)) {
             continue;
-        } else if (read_logstring(line, &sn, &d, &s)) {
-            depth = d;
+        } else if (read_logstring(line, &sn, &depth, &score)) {
+
         } else if (read_randseed(line, &seed)) {
             srand(seed);
             fprintf(stderr, "Randseed %x\n", seed);
@@ -64,19 +60,16 @@ void game_loop(FILE *fp) {
             sn_dump(stderr, &sn);
         }
 
+        if (depth == 0) {
+            board_t moves[MAX_MOVES];
+            int num_possible_moves = sn_find_moves(&sn, moves);
+            if (num_possible_moves > 1) {
+                depth = (int)(log((double) NODES_PER_MOVE) / log((double) num_possible_moves + DEPTH_BREAKER)) -1;
+                depth = max(depth, 1);
+            }
+        }
 
-//        depth = 1;
-//        board_t moves[MAX_MOVES];
-//        int num_possible_moves = sn_find_moves(&sn, moves);
-//
-//        if (num_possible_moves > 1) {
-//            depth = (int)(log((double) NODES_PER_MOVE) / log((double) num_possible_moves + DEPTH_BREAKER)) -1;
-//            depth = max(depth, 1);
-//        }
-//        depth = 1;
-
-//        move = negamax_memory_decision(sn, depth, &score);
-        move = negamax_ab_decision(sn, depth, &score);
+        move = negamax_memory_decision(sn, depth, &score);
 
         fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
                 sn.white.hi,
@@ -94,21 +87,19 @@ void game_loop(FILE *fp) {
             sn_dump(stderr, &sn);
         }
 
-#ifdef USE_STATS
         statistics.pause();
         statistics.dump_last(stderr);
-#endif
+
         puts(out);
         fflush(stdout);
     }
+    statistics.dump_total(stderr);
     free(line);
 }
 
 int main(int argc, const char *argv[]) {
 
-#ifdef USE_STATS
     init_stats();
-#endif
 
     init_rand(0);
 
@@ -122,9 +113,7 @@ int main(int argc, const char *argv[]) {
         fclose(fp);
     }
 
-#ifdef USE_STATS
     cleanup_stats();
-#endif
 
     return 0;
 }

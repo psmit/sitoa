@@ -21,10 +21,7 @@ int read_logstring(const char * line, search_node *sn, int * depth, int * score)
     if (sscanf(line, LOG_FORMAT_STRING, &ply, &white.hi, &white.low, &black.hi, &black.low, &d, &s) == 7) {
         *depth = d;
         *score = s;
-        sn->black = black;
-        sn->white = white;
-        sn->ply = ply;
-        sn->hash = init_hash(black, white);
+        sn_init(sn, white, black, ply);
         return 1;
     }
     return 0;
@@ -56,7 +53,6 @@ int read_randseed(const char * line, unsigned int * seed) {
     return sscanf(line, "Randseed %x", seed) == 1;
 }
 
-
 void write_move(char *out_string, board_t from, board_t to) {
 
     int idx_from = from.ctz();
@@ -67,17 +63,3 @@ void write_move(char *out_string, board_t from, board_t to) {
             'A' + idx_to % BOARD_SIZE, (idx_to / BOARD_SIZE) + 1);
 }
 
-
-
-board_t hex_to_board(const char *in_string) {
-    char work_string[33];
-    strncpy(work_string, in_string, 32);
-
-    board_t board = B_EMPTY;
-    work_string[32] = '\0';
-    board.low = strtoull(work_string + 16, NULL, 16);
-    work_string[16] = '\0';
-    board.hi = strtoull(work_string, NULL, 16);
-
-    return board;
-}

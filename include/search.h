@@ -3,8 +3,30 @@
 #include "headers.h"
 
 unsigned int INTERESTING_MOVE_COUNT[BOARD_SIZE * BOARD_SIZE * 2] = {0};
+
 const int MOVE_RANK[BOARD_SIZE * BOARD_SIZE * 2] = {
-        20, 20, 19, 20, 19, 20, 19, 20, 19, 20, 19, 20, 19, 20, 19, 20, 19, 20, 19, 20, 20, -1, 20, 19, 18, 18, 17, 18, 17, 18, 17, 18, 17, 18, 17, 18, 17, 18, 17, 18, 18, 19, 20, -1, 20, 19, 18, 17, 16, 16, 15, 16, 15, 16, 15, 16, 15, 16, 15, 16, 16, 17, 18, 19, 20, -1, 20, 19, 18, 17, 16, 15, 14, 14, 13, 14, 13, 14, 13, 14, 14, 15, 16, 17, 18, 19, 20, -1, 20, 19, 18, 17, 16, 15, 14, 13, 12, 12, 11, 12, 12, 13, 14, 15, 16, 17, 18, 19, 20, -1, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 11, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, -1, 20, 19, 18, 17, 16, 15, 14, 13, 13, 12, 13, 12, 13, 13, 14, 15, 16, 17, 18, 19, 20, -1, 20, 19, 18, 17, 16, 15, 15, 14, 15, 14, 15, 14, 15, 14, 15, 15, 16, 17, 18, 19, 20, -1, 20, 19, 18, 17, 17, 16, 17, 16, 17, 16, 17, 16, 17, 16, 17, 16, 17, 17, 18, 19, 20, -1, 20, 19, 19, 18, 19, 18, 19, 18, 19, 18, 19, 18, 19, 18, 19, 18, 19, 18, 19, 19, 20, -1, -1, 20, -1, 20, -1, 20, -1, 20, -1, 20, -1, 20, -1, 20, -1, 20, -1, 20, -1, 20, -1, -1
+        20, 20, 19, 20, 19, 20, 19, 20, 19, 20, 19,
+        20, 19, 20, 19, 20, 19, 20, 19, 20, 20, -1,
+        20, 19, 18, 18, 17, 18, 17, 18, 17, 18, 17,
+        18, 17, 18, 17, 18, 17, 18, 18, 19, 20, -1,
+        20, 19, 18, 17, 16, 16, 15, 16, 15, 16, 15,
+        16, 15, 16, 15, 16, 16, 17, 18, 19, 20, -1,
+        20, 19, 18, 17, 16, 15, 14, 14, 13, 14, 13,
+        14, 13, 14, 14, 15, 16, 17, 18, 19, 20, -1,
+        20, 19, 18, 17, 16, 15, 14, 13, 12, 12, 11,
+        12, 12, 13, 14, 15, 16, 17, 18, 19, 20, -1,
+        20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 11,
+        11, 12, 13, 14, 15, 16, 17, 18, 19, 20, -1,
+        20, 19, 18, 17, 16, 15, 14, 13, 13, 12, 13,
+        12, 13, 13, 14, 15, 16, 17, 18, 19, 20, -1,
+        20, 19, 18, 17, 16, 15, 15, 14, 15, 14, 15,
+        14, 15, 14, 15, 15, 16, 17, 18, 19, 20, -1,
+        20, 19, 18, 17, 17, 16, 17, 16, 17, 16, 17,
+        16, 17, 16, 17, 16, 17, 17, 18, 19, 20, -1,
+        20, 19, 19, 18, 19, 18, 19, 18, 19, 18, 19,
+        18, 19, 18, 19, 18, 19, 18, 19, 19, 20, -1,
+        -1, 20, -1, 20, -1, 20, -1, 20, -1, 20, -1,
+        20, -1, 20, -1, 20, -1, 20, -1, 20, -1, -1
 };
 
 inline int move_to_index(board_t move) {
@@ -33,6 +55,7 @@ int compare_moves(const void *a, const void *b) {
 
 
 int negamax_memory_rec(search_node snode, int depth, int alpha, int beta) {
+    ++statistics.negamax_count;
     int alpha_orig = alpha;
 
     trans_node *node = lookup(snode.hash);
@@ -72,6 +95,7 @@ int negamax_memory_rec(search_node snode, int depth, int alpha, int beta) {
         best_value = max(best_value, -negamax_memory_rec(sn_apply_move(snode, moves[m]), depth - 1, -beta, -alpha));
         alpha = max(best_value, alpha);
         if (alpha >= beta) {
+            statistics.prunes++;
             INTERESTING_MOVE_COUNT[move_to_index(moves[m])]++;
             break;
         }
@@ -92,116 +116,6 @@ int negamax_memory_rec(search_node snode, int depth, int alpha, int beta) {
 
     return best_value;
 };
-
-int negamax_ab_rec(search_node node, int depth, int alpha, int beta) {
-
-    if (depth == 0) {
-        return sn_score(&node);
-    }
-
-    board_t moves[MAX_MOVES];
-    int num_moves = sn_find_moves(&node, moves);
-
-    if (num_moves == 0) {
-        return WIN_SCORE;
-    }
-
-    shuffle(moves, num_moves);
-    qsort(moves, num_moves, sizeof(board_t), compare_moves);
-
-    int m;
-    int best_value = -WIN_SCORE * 2;
-
-    for (m = 0; m < num_moves; ++m) {
-        best_value = max(best_value, -negamax_ab_rec(sn_apply_move(node, moves[m]), depth - 1, -beta, -alpha));
-        alpha = max(best_value, alpha);
-        if (alpha >= beta) {
-            INTERESTING_MOVE_COUNT[move_to_index(moves[m])]++;
-            break;
-        }
-    }
-
-    return best_value;
-};
-
-
-int negamax_rec(search_node node, int depth) {
-    if (depth == 0) {
-        return sn_score(&node);
-    }
-
-    board_t moves[MAX_MOVES];
-    int num_moves = sn_find_moves(&node, moves);
-
-    if (num_moves == 0) {
-        return WIN_SCORE;
-    }
-
-    int m;
-    int best_value = -WIN_SCORE * 2;
-
-    for (m = 0; m < num_moves; ++m) {
-        best_value = max(best_value, -negamax_rec(sn_apply_move(node, moves[m]), depth-1));
-    }
-
-    return best_value;
-};
-
-board_t negamax_decision(search_node node, int depth, int * move_score) {
-
-    board_t moves[MAX_MOVES];
-
-    int num_possible_moves = sn_find_moves(&node, moves);
-
-    shuffle(moves, num_possible_moves);
-    qsort(moves, num_possible_moves, sizeof(board_t), compare_moves);
-
-    int m;
-
-    int best_score = -WIN_SCORE;
-    int score;
-    board_t best_move = B_EMPTY;
-
-    for (m = 0; m < num_possible_moves; ++m) {
-        score = -negamax_rec(sn_apply_move(node, moves[m]), depth);
-        if (score > best_score) {
-            best_score = score;
-            best_move = moves[m];
-        }
-    }
-
-    *move_score = best_score;
-    return best_move;
-}
-
-board_t negamax_ab_decision(search_node node, int depth, int * move_score) {
-    board_t moves[MAX_MOVES];
-
-    int num_possible_moves = sn_find_moves(&node, moves);
-
-    shuffle(moves, num_possible_moves);
-    qsort(moves, num_possible_moves, sizeof(board_t), compare_moves);
-
-    int m;
-
-    int best_score = -WIN_SCORE;
-    int score;
-    board_t best_move = B_EMPTY;
-
-    int beta = WIN_SCORE;
-    int alpha = -WIN_SCORE;
-
-    for (m = 0; m < num_possible_moves; ++m) {
-        score = -negamax_ab_rec(sn_apply_move(node, moves[m]), depth, -beta, -alpha);
-        if (score > best_score) {
-            best_score = score;
-            best_move = moves[m];
-        }
-    }
-
-    *move_score = best_score;
-    return best_move;
-}
 
 board_t negamax_memory_decision(search_node node, int depth, int * move_score ) {
     board_t moves[MAX_MOVES];
@@ -225,10 +139,12 @@ board_t negamax_memory_decision(search_node node, int depth, int * move_score ) 
         if (score > best_score) {
             best_score = score;
             best_move = moves[m];
+            alpha = max(best_score, alpha);
         }
     }
 
     *move_score = best_score;
+    fprintf(stderr, "# %d nodes in table\n", STORAGE_ID);
     return best_move;
 }
 

@@ -3,8 +3,6 @@
 #include "headers.h"
 
 board_t find_moves_targets(board_t source, board_t targets, board_t blockades) {
-//    targets ^= source;
-
     board_t distances[BOARD_SIZE * BOARD_SIZE];
     board_t cum_field = source;
 
@@ -30,19 +28,14 @@ board_t find_moves_targets(board_t source, board_t targets, board_t blockades) {
     return distances[1];
 }
 
-int find_possible_moves(board_t board_mover, board_t board_other, board_t *moves) {
-#ifdef USE_STATS
+int find_possible_moves_precalc(board_t board_mover, board_t board_other, board_t *moves, board_t clusters[MAX_VERTICES], int num_clusters, board_t articulation_points[MAX_VERTICES]) {
     statistics.find_moves_count++;
-#endif
 
     int num_moves = 0;
 
     board_t targets, sources, target, source, sources_tmp;
 
     // Moves are found cluster by cluster
-    board_t clusters[MAX_VERTICES];
-    int num_clusters = find_clusters(board_mover, clusters);
-
     int cluster_i;
     for (cluster_i = 0; cluster_i < num_clusters; ++cluster_i) {
 
@@ -50,7 +43,7 @@ int find_possible_moves(board_t board_mover, board_t board_other, board_t *moves
         targets = find_moves_targets(clusters[cluster_i], board_mover ^ clusters[cluster_i], board_other);
 
         //Find source locations in cluster (not breaking up the cluster)
-        sources = ~find_articulation_points(clusters[cluster_i]) & clusters[cluster_i];
+        sources = ~articulation_points[cluster_i] & clusters[cluster_i];
 
         // Combine sources and targets and check that they are valid
 
@@ -85,9 +78,7 @@ int find_possible_moves(board_t board_mover, board_t board_other, board_t *moves
 }
 
 int find_solution_distance(board_t board, board_t other) {
-#ifdef USE_STATS
     statistics.find_solution_distance_count++;
-#endif
 
     // Solution distance is the amounts of steps needed on the current board to end with 0 possible moves
 
@@ -98,8 +89,63 @@ int find_solution_distance(board_t board, board_t other) {
     int sol_distance = 0;
 
     board_t clusters[MAX_VERTICES];
-    int num_clusters = find_clusters(board, clusters);
+    int num_clusters = find_clusters(board, clusters, 0);
 
+    int base_cluster = 0;
+
+    // we stop when we have the same amount base clusters and clusters
+    while (base_cluster < num_clusters - 1) {
+
+        board_t cum_field = clusters[base_cluster];
+        int distance = 0;
+
+        board_t neighbours = find_neighbors(cum_field);
+        neighbours &= ~other;
+
+        // Grow our field until we find a piece of our own
+        while (neighbours && !(neighbours & board)) {
+            cum_field |= neighbours;
+            neighbours = find_neighbors(cum_field);
+            neighbours &= ~cum_field;
+            neighbours &= ~other;
+            distance++;
+        }
+
+        // either we found a reachable cluster, or we can't reach anything anymore
+        if (neighbours & board) {
+            // we know we can reach a cluster, find out which one it is
+            int cluster_i;
+            for (cluster_i = base_cluster + 1; cluster_i < num_clusters; ++cluster_i) {
+                if (neighbours & clusters[cluster_i]) {
+                    // add the cluster to the base and remove it from the list
+                    clusters[base_cluster] |= clusters[cluster_i];
+                    clusters[cluster_i] = clusters[--num_clusters];
+
+                    sol_distance += distance;
+                    // add only one cluster at a time
+                    break;
+                }
+            }
+        } else {
+            // create a new base cluster
+            base_cluster++;
+        }
+
+    }
+
+    return sol_distance;
+}
+
+int find_solution_distance_precalc(board_t board, board_t other, int num_clusters, board_t clusters[MAX_VERTICES]) {
+    statistics.find_solution_distance_count++;
+
+    // Solution distance is the amounts of steps needed on the current board to end with 0 possible moves
+
+    // Building minimum spanning tree by taking a base cluster
+    //  - add closest cluster and record distance
+    // - repeat
+    // If no closest clusters, but there are clusters left: start new base cluster
+    int sol_distance = 0;
     int base_cluster = 0;
 
     // we stop when we have the same amount base clusters and clusters
