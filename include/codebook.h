@@ -8,13 +8,13 @@
 
 struct cb {
     hash_t hash;
-    board_t move;
+    uint16_t moveindices;
 };
 
 const cb CODEBOOK[CODEBOOK_SIZE] = {
-        {0x0, {0x0, 0x0}},
-        {0x0, {0x0, 0x0}},
-        {0x0, {0x0, 0x0}}};
+        {0x0, 0x0},
+        {0x0, 0x0},
+        {0x0, 0x0}};
 
 board_t get_codebook_move(search_node node) {
     unsigned first = 0;
@@ -34,7 +34,9 @@ board_t get_codebook_move(search_node node) {
         if(CODEBOOK[middle].hash < node.hash) {
             first = middle + 1;
         } else if (CODEBOOK[middle].hash == node.hash) {
-            return CODEBOOK[middle].move;
+            uint16_t idx_low = CODEBOOK[middle].moveindices & 0xFF;
+            uint16_t idx_high = CODEBOOK[middle].moveindices >> 8;
+            return B_SINGLE_BIT[idx_low] | B_SINGLE_BIT[idx_high];
         } else {
             last = middle - 1;
         }

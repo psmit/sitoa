@@ -43,6 +43,7 @@ int compare_moves(const void *a, const void *b) {
     const int val1 = INTERESTING_MOVE_COUNT[idx1];
     const int val2 = INTERESTING_MOVE_COUNT[idx2];
 
+#ifndef DISABLE_INTERESING_MOVE_COUNT
     if (val1 == val2) {
         const int mr1 = MOVE_RANK[idx1];
         const int mr2 = MOVE_RANK[idx2];
@@ -51,6 +52,13 @@ int compare_moves(const void *a, const void *b) {
         else return (mr1 > mr2) ? -1 : 1;
     };
     return (val1 > val2) ? -1 : 1;
+#else
+    const int mr1 = MOVE_RANK[idx1];
+    const int mr2 = MOVE_RANK[idx2];
+    if (mr1 == mr2) return idx1 > idx2;
+    return (mr1 > mr2);
+
+#endif
 }
 
 

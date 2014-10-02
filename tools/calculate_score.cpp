@@ -1,5 +1,6 @@
 #define BIG_MEMORY
 #define DETERMINISTIC
+#define DISABLE_INTERESING_MOVE_COUNT
 #include "headers.h"
 
 void codebook_loop(FILE * fp) {

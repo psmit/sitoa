@@ -12,22 +12,7 @@ def main():
 
     items = sorted(items, key=lambda x: x[0])
 
-    real_items = []
-    cur_val = None
-    for h,v in items:
-        if v != cur_val:
-            cur_val = v
-            real_items.append((h,v))
 
-    print(len(real_items))
-
-
-    print("#pragma once")
-    print()
-    print("""
-#define CODEBOOK_MAXPLY 4
-
-    """)
 
 
 
