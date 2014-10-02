@@ -8,7 +8,7 @@ void game_loop(FILE *fp) {
     char out[256];
 
     int depth;
-    int score;
+    int score = 0;
 
     unsigned int seed;
 

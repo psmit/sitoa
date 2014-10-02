@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 from subprocess import Popen, PIPE
-from sys import stderr
+from sys import stderr, argv
 
 def calculate(hashes):
     process = Popen(['./calculate_score'], stdin=PIPE, stderr=PIPE, stdout=PIPE)
@@ -51,8 +51,8 @@ def find_hashes(max_ply, hashes):
     find_hashes(max_ply, expanded_hashes)
 
 def main():
-    max_ply = 5
-    depth = 1
+    max_ply = argv[1] if len(argv) > 1 else 4
+    depth = argv[2] if len(argv) > 2 else 6 
     start_string = (0, "00aa8002aa000aa8002aa000aa8002aa", "00002aa800aaa002aa800aaa002aa800", depth, 0)
 
     expanded_hashes = expand([start_string])

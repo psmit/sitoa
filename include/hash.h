@@ -3,6 +3,8 @@
 #include "headers.h"
 
 typedef uint64_t hash_t;
+#define HASH_T_MAX UINT64_MAX
+
 const hash_t rand_table[BOARD_SIZE * BOARD_SIZE][2] = {
         {0x653eddf1f1dc10fdul, 0x95a6159531550dd0ul},
         {0x1bbaf74aa46b3f76ul, 0x9b08c28896d1dd98ul},

@@ -22,6 +22,12 @@ def main():
     print(len(real_items))
 
 
+    print("#pragma once")
+    print()
+    print("""
+#define CODEBOOK_MAXPLY 4
+
+    """)
 
 
 
