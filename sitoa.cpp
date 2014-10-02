@@ -1,6 +1,4 @@
-#include <search.h>
 #include "headers.h"
-
 
 void game_loop(FILE *fp) {
     board_t move;

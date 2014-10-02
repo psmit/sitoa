@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="test_clusters" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="tools/data/clusters" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="sitoa" TARGET_NAME="test_clusters" CONFIG_NAME="Debug">
-    <envs />
-    <RunnerSettings RunnerId="CPPAppRunner" />
-    <ConfigurationWrapper RunnerId="CPPAppRunner" />
-    <method />
-  </configuration>
-</component>

@@ -144,7 +144,7 @@ board_t negamax_memory_decision(search_node node, int depth, int * move_score ) 
     }
 
     *move_score = best_score;
-    fprintf(stderr, "# %d nodes in table\n", STORAGE_ID);
+//    fprintf(stderr, "# %d nodes in table\n", STORAGE_ID);
     return best_move;
 }
 

@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="test_moves" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="sitoa" TARGET_NAME="test_moves" CONFIG_NAME="Debug">
-    <envs />
-    <RunnerSettings RunnerId="CPPAppRunner" />
-    <ConfigurationWrapper RunnerId="CPPAppRunner" />
-    <method />
-  </configuration>
-</component>

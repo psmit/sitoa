@@ -33,6 +33,7 @@ int rand_i(int min, int max) {
 }
 
 void shuffle(board_t *moves, int num_moves) {
+#ifndef DETERMINISTIC
     int m;
     int n;
     for (m = 0; m < num_moves; ++m) {
@@ -44,4 +45,5 @@ void shuffle(board_t *moves, int num_moves) {
         }
 
     }
+#endif
 }
