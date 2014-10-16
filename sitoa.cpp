@@ -1,13 +1,67 @@
 #include "headers.h"
 
+struct move_stats {
+    int ply;
+    int depth;
+    double time;
+
+};
+
+int get_depth(int iter, int fixed_depth, search_node *sn, move_stats *stats, double time_left) {
+    // if fixed depth, do exactly one iteration
+
+
+    board_t moves[MAX_MOVES];
+
+    int depth = stats->depth;
+
+    int expected_moves = min(find_solution_distance(sn->white, sn->black),find_solution_distance(sn->black, sn->white));
+    int branch_factor = sn_find_moves(sn, moves);
+
+    double time_per_move = time_left / (double) branch_factor;
+    fprintf(stderr, "%d %d %.3f\n", stats->depth, stats->ply, stats->time);
+    fprintf(stderr, "%d %d %d %.3f\n", depth, expected_moves, branch_factor, time_per_move);
+    fflush(stderr);
+
+
+
+
+
+    if (fixed_depth != 0) {
+        if (iter != 0) {
+            return 0;
+        }
+        else {
+            return fixed_depth;
+        }
+    }
+
+    if (stats->depth == 0) {
+        return 2;
+    }
+
+    if (stats->time * branch_factor * 0.6 < time_per_move) {
+        return depth + 1;
+    }
+    if (iter != 0) {
+        return 0;
+    }
+
+    return depth;
+}
+
 void game_loop(FILE *fp) {
     board_t move;
+
+    struct timeval search_start, search_end;
 
     int debug = 0;
 
     char out[256];
 
     int depth;
+    int move_iterations;
+    int fixed_depth = 0;
     int score = 0;
 
     unsigned int seed;
@@ -15,12 +69,14 @@ void game_loop(FILE *fp) {
     search_node sn;
     sn_init(&sn, B_WHITE_START, B_BLACK_START, 0);
 
+    move_stats ms = {0, 0, 0.0};
+
     // getline variables
     size_t nbytes = 0;
     char *line = NULL;
 
     while (getline(&line, &nbytes, fp) > 0) {
-        depth = 0;
+        fixed_depth = 0;
         statistics.resume();
         if (read_move(line, &move)) {
             sn = sn_apply_move(sn, move);
@@ -31,7 +87,7 @@ void game_loop(FILE *fp) {
 
         } else if (read_comment(line) || read_debug(line, &debug)) {
             continue;
-        } else if (read_logstring(line, &sn, &depth, &score)) {
+        } else if (read_logstring(line, &sn, &fixed_depth, &score)) {
 
         } else if (read_randseed(line, &seed)) {
             srand(seed);
@@ -43,7 +99,7 @@ void game_loop(FILE *fp) {
                     sn.white.low,
                     sn.black.hi,
                     sn.black.low,
-                    depth,
+                    fixed_depth,
                     score);
             continue;
         } else if (read_dump(line)) {
@@ -58,24 +114,27 @@ void game_loop(FILE *fp) {
             sn_dump(stderr, &sn);
         }
 
-        if (depth == 0) {
-            board_t moves[MAX_MOVES];
-            int num_possible_moves = sn_find_moves(&sn, moves);
-            if (num_possible_moves > 1) {
-                depth = (int)(log((double) NODES_PER_MOVE) / log((double) num_possible_moves + DEPTH_BREAKER)) -1;
-                depth = max(depth, 1);
-            }
+        move_iterations = 0;
+        move = B_EMPTY;
+
+        while ((depth = get_depth(move_iterations, fixed_depth, &sn, &ms, TOTAL_TIME - statistics.cur_time_spent()))) {
+            fprintf(stderr, "Run with depth %d\n", depth);
+            gettimeofday(&search_start, NULL);
+            move = negamax_memory_decision(sn, depth, &score);
+            gettimeofday(&search_end, NULL);
+
+            fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
+                    sn.white.hi,
+                    sn.white.low,
+                    sn.black.hi,
+                    sn.black.low,
+                    depth,
+                    score);
+            fflush(stderr);
+            ms = {sn.ply, depth, (search_end.tv_sec + search_end.tv_usec / 1000000.0) - (search_start.tv_sec + search_start.tv_usec / 1000000.0)};
+
+            move_iterations++;
         }
-
-        move = negamax_memory_decision(sn, depth, &score);
-
-        fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
-                sn.white.hi,
-                sn.white.low,
-                sn.black.hi,
-                sn.black.low,
-                depth,
-                score);
 
         write_move(out, (sn.white | sn.black) & move, ~(sn.white | sn.black) & move);
 
@@ -86,7 +145,7 @@ void game_loop(FILE *fp) {
         }
 
         statistics.pause();
-        statistics.dump_last(stderr);
+//        statistics.dump_last(stderr);
 
         puts(out);
         fflush(stdout);

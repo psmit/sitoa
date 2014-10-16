@@ -38,6 +38,8 @@
 #define C_WHITE 0
 #define C_BLACK 1
 
+#define TOTAL_TIME 30.0
+
 
 struct board_t {
     uint64_t hi;

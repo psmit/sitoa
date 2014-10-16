@@ -82,6 +82,12 @@ int sn_score(search_node * node) {
     }
 }
 
+int sn_min_solution_distance(search_node * node) {
+    int score_black = find_solution_distance_precalc(node->black, node->white, node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
+    int score_white = find_solution_distance_precalc(node->white, node->black, node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
+    return max(score_black, score_white);
+}
+
 void sn_dump(FILE * out, search_node * node) {
     fprintf(out, "Dump Search node\nPly %d; hash %016" PRIx64 "\n", node->ply, node->hash);
     char out_s[256];

@@ -50,6 +50,12 @@ struct stats {
     void cleanup() {
         delete prev_stats;
     }
+
+    double cur_time_spent() {
+        struct timeval end;
+        gettimeofday(&end, NULL);
+        return (end.tv_sec + end.tv_usec / 1000000.0) - (last_start.tv_sec + last_start.tv_usec / 1000000.0);
+    }
 };
 
 stats statistics = {0, 0, {0, 0}, 0, 0, 0};
