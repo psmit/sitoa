@@ -134,6 +134,8 @@ void game_loop(FILE *fp) {
             ms = {sn.ply, depth, (search_end.tv_sec + search_end.tv_usec / 1000000.0) - (search_start.tv_sec + search_start.tv_usec / 1000000.0)};
 
             move_iterations++;
+
+            if (score == WIN_SCORE || score == -WIN_SCORE) break;
         }
 
         write_move(out, (sn.white | sn.black) & move, ~(sn.white | sn.black) & move);
