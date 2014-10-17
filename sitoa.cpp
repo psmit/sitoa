@@ -117,7 +117,7 @@ void game_loop(FILE *fp) {
         move_iterations = 0;
         move = B_EMPTY;
 
-        while ((depth = get_depth(move_iterations, fixed_depth, &sn, &ms, TOTAL_TIME - statistics.cur_time_spent()))) {
+        while ((depth = get_depth(move_iterations, fixed_depth, &sn, &ms, TOTAL_TIME - statistics.time_spent))) {
             fprintf(stderr, "Run with depth %d\n", depth);
             gettimeofday(&search_start, NULL);
             move = negamax_memory_decision(sn, depth, &score);
