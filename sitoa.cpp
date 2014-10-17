@@ -18,9 +18,9 @@ int get_depth(int iter, int fixed_depth, search_node *sn, move_stats *stats, dou
     int expected_moves = min(find_solution_distance(sn->white, sn->black),find_solution_distance(sn->black, sn->white));
     int branch_factor = sn_find_moves(sn, moves);
 
-    double time_per_move = time_left / (double) branch_factor;
+    double time_per_move = time_left / (double) expected_moves;
     fprintf(stderr, "%d %d %.3f\n", stats->depth, stats->ply, stats->time);
-    fprintf(stderr, "%d %d %d %.3f\n", depth, expected_moves, branch_factor, time_per_move);
+    fprintf(stderr, "%d %d %d %.3f %.3f\n", depth, expected_moves, branch_factor, time_per_move, time_left);
     fflush(stderr);
 
 
