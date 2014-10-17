@@ -28,7 +28,7 @@ board_t find_moves_targets(board_t source, board_t targets, board_t blockades) {
     return distances[1];
 }
 
-int find_possible_moves_precalc(board_t board_mover, board_t board_other, board_t *moves, board_t clusters[MAX_VERTICES], int num_clusters, board_t articulation_points[MAX_VERTICES]) {
+int find_possible_moves_precalc(board_t board_mover, board_t board_other, board_t *moves, board_t const clusters[MAX_VERTICES], int num_clusters, board_t const articulation_points[MAX_VERTICES]) {
     statistics.find_moves_count++;
 
     int num_moves = 0;
@@ -136,9 +136,14 @@ int find_solution_distance(board_t board, board_t other) {
     return sol_distance;
 }
 
-int find_solution_distance_precalc(board_t board, board_t other, int num_clusters, board_t clusters[MAX_VERTICES]) {
+int find_solution_distance_precalc(board_t board, board_t other, int num_clusters, board_t const c_clusters[MAX_VERTICES]) {
     statistics.find_solution_distance_count++;
 
+    board_t clusters[MAX_VERTICES];
+    int i;
+    for (i = 0; i < num_clusters; ++i) {
+        clusters[i] = c_clusters[i];
+    }
     // Solution distance is the amounts of steps needed on the current board to end with 0 possible moves
 
     // Building minimum spanning tree by taking a base cluster

@@ -66,14 +66,17 @@ search_node sn_apply_move(search_node n, board_t move) {
     return n;
 }
 
-int sn_find_moves(search_node * node, board_t * moves) {
+int sn_find_moves(search_node const * node, board_t * moves) {
     int color = node->ply % 2 ? C_BLACK : C_WHITE;
     return find_possible_moves_precalc(node->ply % 2 ? node->black: node->white, node->ply % 2 ? node->white: node->black, moves, node->clusters[color], node->num_clusters[color], node->cluster_articulation_points[color]);
 }
 
-int sn_score(search_node * node) {
+int sn_score(search_node const * node) {
     int score_black = find_solution_distance_precalc(node->black, node->white, node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
     int score_white = find_solution_distance_precalc(node->white, node->black, node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
+//    int score_black = find_solution_distance(node->black, node->white);
+//    int score_white = find_solution_distance(node->white, node->black);
+
 
     if (node->ply % 2 == 1) {
         return score_white - score_black;
