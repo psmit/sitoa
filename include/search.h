@@ -135,7 +135,7 @@ board_t negamax_memory_decision(search_node node, int depth, int * move_score ) 
 
     int m;
 
-    int best_score = -WIN_SCORE;
+    int best_score = -2 * WIN_SCORE;
     int score;
     board_t best_move = B_EMPTY;
 

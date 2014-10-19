@@ -63,3 +63,13 @@ void write_move(char *out_string, board_t from, board_t to) {
             'A' + idx_to % BOARD_SIZE, (idx_to / BOARD_SIZE) + 1);
 }
 
+int read_debug_moves(const char * line, search_node *sn) {
+    int ply;
+    board_t white, black;
+    if (sscanf(line,  "DEBUGMOVES %d " BOARD_FORMAT_STRING " " BOARD_FORMAT_STRING "\n", &ply, &white.hi, &white.low, &black.hi, &black.low) == 5) {
+        sn_init(sn, white, black, ply);
+        return 1;
+    }
+    return 0;
+}
+

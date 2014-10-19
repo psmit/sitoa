@@ -89,6 +89,18 @@ void game_loop(FILE *fp) {
             continue;
         } else if (read_logstring(line, &sn, &fixed_depth, &score)) {
 
+        } else if (read_debug_moves(line, &sn)) {
+            sn_dump(stderr, &sn);
+            board_t moves[MAX_MOVES];
+            int num_moves = sn_find_moves(&sn, moves);
+            for (int m = 0; m < num_moves; ++m) {
+                write_move(out, (sn.white | sn.black) & moves[m], ~(sn.white | sn.black) & moves[m]);
+                puts(out);
+
+            }
+            puts("--------");
+            fflush(stdout);
+            continue;
         } else if (read_randseed(line, &seed)) {
             srand(seed);
             fprintf(stderr, "Randseed %x\n", seed);
