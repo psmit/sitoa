@@ -15,7 +15,7 @@ int get_depth(int iter, int fixed_depth, search_node *sn, move_stats *stats, dou
 
     int depth = stats->depth;
 
-    int expected_moves = min(find_solution_distance(sn->white, sn->black),find_solution_distance(sn->black, sn->white));
+    int expected_moves = 2 * min(find_solution_distance(sn->white, sn->black),find_solution_distance(sn->black, sn->white));
     int branch_factor = sn_find_moves(sn, moves);
 
     double time_per_move = time_left / (double) expected_moves;
