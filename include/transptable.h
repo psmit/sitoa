@@ -36,3 +36,9 @@ trans_node *lookup(hash_t h) {
     }
     return node;
 }
+
+void clear_transposition_table() {
+    memset(TRANS_TABLE, 0, HASH_TABLE_SIZE*sizeof(*TRANS_TABLE));
+    memset(TRANS_STORAGE, 0, STORAGE_SIZE * sizeof(*TRANS_STORAGE));
+    STORAGE_ID = 0;
+}
