@@ -9,7 +9,8 @@ double time_negamax(search_node *node, int depth, board_t *move) {
     *move = negamax_memory_decision(*node, depth, &score);
     gettimeofday(&search_end, NULL);
 
-    return (search_end.tv_sec + search_end.tv_usec / 1000000.0) - (search_start.tv_sec + search_start.tv_usec / 1000000.0);
+    double t = (search_end.tv_sec + search_end.tv_usec / 1000000.0) - (search_start.tv_sec + search_start.tv_usec / 1000000.0);
+    return t;
 }
 
 
@@ -63,10 +64,11 @@ void game_loop(FILE *fp) {
         int score_tot;
         sn_scores(&sn, &score_me, &score_ot, &score_tot);
 
+        double base_time = time_negamax(&sn, depth, &move);
         double times[7];
         int i;
-        for (i = 0; i < 3; ++i) {
-            times[i] = time_negamax(&sn,  + i, &move);
+        for (i = 1; i < 3; ++i) {
+            times[i] = time_negamax(&sn, depth + i, &move) / base_time;
         }
 
         sn = sn_apply_move(sn, move);
@@ -79,17 +81,16 @@ void game_loop(FILE *fp) {
         num_moves_n = sn_find_moves(&sn, moves);
 
         for (i = -1; i < 3; ++i) {
-            times[i + 4] = time_negamax(&sn, depth + i, &move);
+            times[i + 4] = time_negamax(&sn, depth + i, &move) / base_time;
         }
 
-        printf("%d %d %d %d %d %d %.2f %.2f %.2f %d %d %d %d %.2f %.2f %.2f %.2f\n",
+        printf("%d %d %d %d %d %d %.2f %.2f %d %d %d %d %.2f %.2f %.2f %.2f\n",
                 sn.ply,
                 depth,
                 num_moves,
                 score_me,
                 score_ot,
                 score_tot,
-                times[0],
                 times[1],
                 times[2],
                 num_moves_n,
