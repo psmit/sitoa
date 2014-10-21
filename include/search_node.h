@@ -74,14 +74,26 @@ int sn_find_moves(search_node const * node, board_t * moves) {
 int sn_score(search_node const * node) {
     int score_black = find_solution_distance_precalc(node->black, node->white, node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
     int score_white = find_solution_distance_precalc(node->white, node->black, node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
-//    int score_black = find_solution_distance(node->black, node->white);
-//    int score_white = find_solution_distance(node->white, node->black);
-
 
     if (node->ply % 2 == 1) {
         return score_white - score_black;
     } else {
         return score_black - score_white;
+    }
+}
+
+void sn_scores(search_node const * node, int * score_me, int * score_oth, int * score_tot) {
+    int score_black = find_solution_distance_precalc(node->black, node->white, node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
+    int score_white = find_solution_distance_precalc(node->white, node->black, node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
+
+    if (node->ply % 2 == 1) {
+        *score_me = score_white;
+        *score_oth = score_black;
+        *score_tot = score_white - score_black;
+    } else {
+        *score_me = score_black;
+        *score_oth = score_white;
+        *score_tot = score_black - score_white;
     }
 }
 
