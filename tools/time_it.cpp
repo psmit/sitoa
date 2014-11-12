@@ -87,6 +87,16 @@ void game_loop(FILE *fp) {
             times[i + 4] = time_negamax(&sn, depth + i, &move) / base_time;
         }
 
+        fprintf(stderr, "%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+                times[0],
+                times[1],
+                times[2],
+                times[3],
+                times[4],
+                times[5],
+                times[6],
+                times[7]);
+
         printf("%d %d %d %d %d %d %.2f %.2f %d %d %d %d %.2f %.2f %.2f %.2f\n",
                 sn.ply,
                 depth,
