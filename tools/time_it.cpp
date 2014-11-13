@@ -1,6 +1,10 @@
 #include "headers.h"
 #include "time.h"
 
+#define XSTR(x) STR(x)
+#define STR(x) #x
+
+#pragma message "Clock resolution: " XSTR(CLOCKS_PER_SEC)
 
 double time_negamax(search_node *node, int depth, board_t *move) {
     int score;
