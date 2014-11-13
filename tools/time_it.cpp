@@ -61,9 +61,10 @@ void game_loop(FILE *fp) {
         //colums:
         // ply, #moves, depth, sol_dis_me, sol_dis_other, sol_score, time_cur, time_cur+1, time_cur+2, #moves_nextply, next-1, next-0, next+1, next+2
 
+        int max_iter = 4;
         double base_time = 0.0;
-        while (base_time < 1.0) {
-
+        while (base_time < 1.0 && max_iter > 0) {
+            max_iter--;
 
             num_moves = sn_find_moves(&sn, moves);
             int score_me;
