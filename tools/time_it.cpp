@@ -37,7 +37,7 @@ void game_loop(FILE *fp) {
     int num_moves, num_moves_n;
 
 
-    search_node sn;
+    search_node sn, sn2;
     sn_init(&sn, B_WHITE_START, B_BLACK_START, 0);
 
     // getline variables
@@ -85,19 +85,19 @@ void game_loop(FILE *fp) {
                 times[i] = time_negamax(&sn, depth + i, &move) / base_time;
             }
 
-            sn = sn_apply_move(sn, move);
-            sn_find_moves(&sn, moves);
-            sn = sn_apply_move(sn, moves[0]);
+            sn2 = sn_apply_move(sn, move);
+            sn_find_moves(&sn2, moves);
+            sn2 = sn_apply_move(sn2, moves[0]);
             int score_me_n;
             int score_ot_n;
             int score_tot_n;
-            sn_scores(&sn, &score_me_n, &score_ot_n, &score_tot_n);
-            num_moves_n = sn_find_moves(&sn, moves);
+            sn_scores(&sn2, &score_me_n, &score_ot_n, &score_tot_n);
+            num_moves_n = sn_find_moves(&sn2, moves);
 
 
             for (i = -1; i < 3; ++i) {
                 clear_transposition_table();
-                times[i + 4] = time_negamax(&sn, depth + i, &move) / base_time;
+                times[i + 4] = time_negamax(&sn2, depth + i, &move) / base_time;
             }
 
             fprintf(stderr, "%.4f\n", base_time);
