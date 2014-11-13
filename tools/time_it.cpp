@@ -67,11 +67,13 @@ void game_loop(FILE *fp) {
         int score_tot;
         sn_scores(&sn, &score_me, &score_ot, &score_tot);
 
+        clear_transposition_table();
         double base_time = time_negamax(&sn, depth, &move);
         double times[7];
         int i;
-        clear_transposition_table();
+
         for (i = 1; i < 3; ++i) {
+            clear_transposition_table();
             times[i] = time_negamax(&sn, depth + i, &move) / base_time;
         }
 
@@ -84,9 +86,10 @@ void game_loop(FILE *fp) {
         sn_scores(&sn, &score_me_n, &score_ot_n, &score_tot_n);
         num_moves_n = sn_find_moves(&sn, moves);
 
-        clear_transposition_table();
+
 
         for (i = -1; i < 3; ++i) {
+            clear_transposition_table();
             times[i + 4] = time_negamax(&sn, depth + i, &move) / base_time;
         }
 
