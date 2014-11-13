@@ -15,7 +15,7 @@ struct svm_model_data {
     svm_node* SV[B];		/* SVs (SV[l]) */
 };
 
-svm_model_data<1, 1> the_model = {{3,3,0,0.1}, {{0, 0.0}},{0.0}};
+svm_model_data<1, 2> the_model = {{3,3,0,0.1}, {{0, 0.0}, {-1, 0}},{0.0}};
 
 template <int A, int B>
 void fill_model(svm_model_data<A,B> &model_data, svm_model * model) {
@@ -38,6 +38,8 @@ int main(int argc, const char *argv[]) {
     svm_model model;
     fill_model(the_model, &model);
 //    the_model.fill_svm_model(&model);
+
+    printf("%d\n", model.param.svm_type);
 
 
 
