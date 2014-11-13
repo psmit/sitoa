@@ -73,6 +73,10 @@ void game_loop(FILE *fp) {
 
             clear_transposition_table();
             base_time = time_negamax(&sn, depth, &move);
+            if (base_time < 0.05) {
+                depth++;
+                continue;
+            }
             double times[7];
             int i;
 
