@@ -1,23 +1,22 @@
 #include "headers.h"
+#include "time.h"
 
 
 double time_negamax(search_node *node, int depth, board_t *move) {
     int score;
-    struct timeval search_start, search_end;
+    clock_t t;
 
-    gettimeofday(&search_start, NULL);
+    t = clock();
     *move = negamax_memory_decision(*node, depth, &score);
-    gettimeofday(&search_end, NULL);
+    t = clock() - t;
 
-    double t = (search_end.tv_sec + search_end.tv_usec / 1000000.0) - (search_start.tv_sec + search_start.tv_usec / 1000000.0);
-    return t;
+    return ((double) t) / CLOCKS_PER_SEC;
+
 }
 
 
 void game_loop(FILE *fp) {
     board_t move;
-
-    struct timeval search_start, search_end;
 
     int debug = 0;
 
