@@ -45,7 +45,7 @@ void game_loop(FILE *fp) {
     char *line = NULL;
 
     while (getline(&line, &nbytes, fp) > 0) {
-        statistics.resume();
+//        statistics.resume();
         if (read_quit(line)) {
             break;
         } else if (read_comment(line) || read_debug(line, &debug)) {
@@ -61,72 +61,78 @@ void game_loop(FILE *fp) {
         //colums:
         // ply, #moves, depth, sol_dis_me, sol_dis_other, sol_score, time_cur, time_cur+1, time_cur+2, #moves_nextply, next-1, next-0, next+1, next+2
 
-        num_moves = sn_find_moves(&sn, moves);
-        int score_me;
-        int score_ot;
-        int score_tot;
-        sn_scores(&sn, &score_me, &score_ot, &score_tot);
+        double base_time = 0.0;
+        while (base_time < 1.0) {
 
-        clear_transposition_table();
-        double base_time = time_negamax(&sn, depth, &move);
-        double times[7];
-        int i;
 
-        for (i = 1; i < 3; ++i) {
+            num_moves = sn_find_moves(&sn, moves);
+            int score_me;
+            int score_ot;
+            int score_tot;
+            sn_scores(&sn, &score_me, &score_ot, &score_tot);
+
             clear_transposition_table();
-            times[i] = time_negamax(&sn, depth + i, &move) / base_time;
-        }
+            base_time = time_negamax(&sn, depth, &move);
+            double times[7];
+            int i;
 
-        sn = sn_apply_move(sn, move);
-        sn_find_moves(&sn, moves);
-        sn = sn_apply_move(sn, moves[0]);
-        int score_me_n;
-        int score_ot_n;
-        int score_tot_n;
-        sn_scores(&sn, &score_me_n, &score_ot_n, &score_tot_n);
-        num_moves_n = sn_find_moves(&sn, moves);
+            for (i = 1; i < 3; ++i) {
+                clear_transposition_table();
+                times[i] = time_negamax(&sn, depth + i, &move) / base_time;
+            }
 
-
-
-        for (i = -1; i < 3; ++i) {
-            clear_transposition_table();
-            times[i + 4] = time_negamax(&sn, depth + i, &move) / base_time;
-        }
-
-        fprintf(stderr, "%.4f\n", base_time);
-        fflush(stderr);
-
-        printf("%d %d %d %d %d %d %.2f %.2f %d %d %d %d %.2f %.2f %.2f %.2f\n",
-                sn.ply,
-                depth,
-                num_moves,
-                score_me,
-                score_ot,
-                score_tot,
-                times[1],
-                times[2],
-                num_moves_n,
-                score_me_n,
-                score_ot_n,
-                score_tot_n,
-                times[3],
-                times[4],
-                times[5],
-                times[6]
-        );
+            sn = sn_apply_move(sn, move);
+            sn_find_moves(&sn, moves);
+            sn = sn_apply_move(sn, moves[0]);
+            int score_me_n;
+            int score_ot_n;
+            int score_tot_n;
+            sn_scores(&sn, &score_me_n, &score_ot_n, &score_tot_n);
+            num_moves_n = sn_find_moves(&sn, moves);
 
 
-        if (STORAGE_ID * 2 > STORAGE_SIZE) {
-            clear_transposition_table();
-            fputs("#Clearing transposition table", stderr);
+            for (i = -1; i < 3; ++i) {
+                clear_transposition_table();
+                times[i + 4] = time_negamax(&sn, depth + i, &move) / base_time;
+            }
+
+            fprintf(stderr, "%.4f\n", base_time);
             fflush(stderr);
+
+            printf("%d %d %d %d %d %d %.2f %.2f %d %d %d %d %.2f %.2f %.2f %.2f\n",
+                    sn.ply,
+                    depth,
+                    num_moves,
+                    score_me,
+                    score_ot,
+                    score_tot,
+                    times[1],
+                    times[2],
+                    num_moves_n,
+                    score_me_n,
+                    score_ot_n,
+                    score_tot_n,
+                    times[3],
+                    times[4],
+                    times[5],
+                    times[6]
+            );
+            fflush(stdout);
+            depth++;
         }
-        statistics.pause();
+
+
+//        if (STORAGE_ID * 2 > STORAGE_SIZE) {
+//            clear_transposition_table();
+//            fputs("#Clearing transposition table", stderr);
+//            fflush(stderr);
+//        }
+//        statistics.pause();
 
 //        puts(out);
-        fflush(stdout);
+
     }
-    statistics.dump_total(stderr);
+//    statistics.dump_total(stderr);
     free(line);
 }
 
