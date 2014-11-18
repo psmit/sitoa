@@ -61,7 +61,7 @@ void game_loop(FILE *fp) {
 
         int max_iter = 4;
         long base_time = 0l;
-        while (base_time < 1000l && max_iter > 0) {
+        while (base_time < 500l && max_iter > 0) {
             max_iter--;
 
             num_moves = sn_find_moves(&sn, moves);
