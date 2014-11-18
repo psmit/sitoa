@@ -115,14 +115,19 @@ void game_loop(FILE *fp) {
             );
             fflush(stdout);
             depth++;
+            if (STORAGE_ID * 2 > STORAGE_SIZE) {
+                fprintf(stderr, "#Clearing transposition table %u \n", STORAGE_ID);
+                clear_transposition_table();
+                fflush(stderr);
+            }
         }
 
 
-        if (STORAGE_ID * 2 > STORAGE_SIZE) {
-            fprintf(stderr, "#Clearing transposition table %u \n", STORAGE_ID);
-            clear_transposition_table();
-            fflush(stderr);
-        }
+//        if (STORAGE_ID * 2 > STORAGE_SIZE) {
+//            fprintf(stderr, "#Clearing transposition table %u \n", STORAGE_ID);
+//            clear_transposition_table();
+//            fflush(stderr);
+//        }
 //        statistics.pause();
 
 //        puts(out);
