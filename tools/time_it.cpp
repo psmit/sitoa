@@ -119,8 +119,8 @@ void game_loop(FILE *fp) {
 
 
         if (STORAGE_ID * 2 > STORAGE_SIZE) {
+            fprintf(stderr, "#Clearing transposition table %u \n", STORAGE_ID);
             clear_transposition_table();
-            fputs("#Clearing transposition table\n", stderr);
             fflush(stderr);
         }
 //        statistics.pause();
