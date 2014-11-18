@@ -2,7 +2,7 @@
 
 #include "headers.h"
 
-
+inline // inlining seems to be 10% faster
 board_t find_neighbors(const board_t &board) {
     // Superfast way of finding all neighbors on a board. The B_HAS_ vectors make sure that a board has the NORTH/WEST/EAST neighbour and the bitshifts do the rest
     return (board | // if we start with a board we can filter it with an xor later
