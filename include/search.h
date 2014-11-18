@@ -63,7 +63,6 @@ int compare_moves(const void *a, const void *b) {
 
 
 int negamax_memory_rec(search_node snode, int depth, int alpha, int beta) {
-    ++statistics.negamax_count;
     int alpha_orig = alpha;
 
     trans_node *node = lookup(snode.hash);
@@ -103,7 +102,6 @@ int negamax_memory_rec(search_node snode, int depth, int alpha, int beta) {
         best_value = max(best_value, -negamax_memory_rec(sn_apply_move(snode, moves[m]), depth - 1, -beta, -alpha));
         alpha = max(best_value, alpha);
         if (alpha >= beta) {
-            statistics.prunes++;
             INTERESTING_MOVE_COUNT[move_to_index(moves[m])]++;
             break;
         }

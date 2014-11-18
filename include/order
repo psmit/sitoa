@@ -1,7 +1,6 @@
 includes.h
 definitions.h
 debug.h
-stats.h
 util.h
 graph.h
 ayu.h

@@ -3,7 +3,6 @@
 #include "includes.h"
 #include "definitions.h"
 #include "debug.h"
-#include "stats.h"
 #include "util.h"
 #include "graph.h"
 #include "ayu.h"
