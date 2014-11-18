@@ -2,29 +2,15 @@
 
 #include "headers.h"
 
-board_t find_neighbors(board_t board) {
-    statistics.find_neighbours_count++;
 
-    // initialize neighbors with board to be able to filter them on the end
-    board_t neighbors = board;
-    // create working board b
-    board_t b = board;
-
-    board_t piece;
-
-    // loop through all pieces one at a time
-    while (b) {
-        //identify single piece
-        piece = b.lso();
-        // remove piece from working board
-        b ^= piece;
-
-        // Add neighbors of piece to neighbors collection
-        neighbors |= B_NEIGHBOURS[piece.ctz()];
-    }
-
-    // remove board from neighbors before returning it
-    return neighbors ^ board;
+board_t find_neighbors(const board_t &board) {
+    // Superfast way of finding all neighbors on a board. The B_HAS_ vectors make sure that a board has the NORTH/WEST/EAST neighbour and the bitshifts do the rest
+    return (board | // if we start with a board we can filter it with an xor later
+            (board >> 11) | // South goes always right, the shift will drop the extra bits
+            ((board & B_HAS_NORTH) << 11) |
+            ((board & B_HAS_WEST) >> 1) |
+            ((board & B_HAS_EAST) << 1))
+            ^ board; // at last the xor to remove the original board
 }
 
 int find_clusters(board_t board, board_t clusters[MAX_VERTICES], int num_clusters) {

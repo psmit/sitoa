@@ -105,6 +105,14 @@ struct board_t {
     inline int popcount() const {
         return __builtin_popcountll(hi) + __builtin_popcountll(low);
     }
+
+    inline board_t operator<<(const int &rhs) const {
+        return {hi << rhs | (low >> (64-rhs)), low << rhs};
+    }
+
+    inline board_t operator>>(const int &rhs) const {
+        return {hi >> rhs, low >> rhs | hi << (64-rhs)};
+    }
 };
 
 const board_t B_SINGLE_BIT[BOARD_SIZE * BOARD_SIZE] = {
@@ -356,6 +364,11 @@ const board_t B_NEIGHBOURS[BOARD_SIZE * BOARD_SIZE] = {
 const board_t B_EMPTY = {0, 0};
 const board_t B_BLACK_START = {0x00002aa800aaa002ul, 0xaa800aaa002aa800ul};
 const board_t B_WHITE_START = {0x00aa8002aa000aa8ul, 0x002aa000aa8002aaul};
+
+const board_t B_HAS_NORTH = {0x00003FFFFFFFFFFFul,0xFFFFFFFFFFFFFFFFul};
+const board_t B_HAS_WEST =  {0x01FFBFF7FEFFDFFBul,0xFF7FEFFDFFBFF7FEul};
+const board_t B_HAS_EAST =  {0x00FFDFFBFF7FEFFDul,0xFFBFF7FEFFDFFBFFul};
+
 
 const board_t B_CIRCLES[BOARD_SIZE] = {
         {0x01ffe00c01803006ul, 0x00c0180300600ffful},
