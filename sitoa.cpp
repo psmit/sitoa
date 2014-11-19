@@ -2,52 +2,6 @@
 
 typedef std::chrono::high_resolution_clock my_clock;
 
-struct move_stats {
-    int ply;
-    int depth;
-    double time;
-
-};
-
-int get_depth(int iter, int fixed_depth, search_node *sn, move_stats *stats, double time_left) {
-    // if fixed depth, do exactly one iteration
-
-
-    board_t moves[MAX_MOVES];
-
-    int depth = stats->depth;
-
-    int expected_moves = 2 * min(find_solution_distance(sn->white, sn->black),find_solution_distance(sn->black, sn->white));
-    int branch_factor = sn_find_moves(sn, moves);
-
-    double time_per_move = time_left / (double) expected_moves;
-    fprintf(stderr, "%d %d %.3f\n", stats->depth, stats->ply, stats->time);
-    fprintf(stderr, "%d %d %d %.3f %.3f\n", depth, expected_moves, branch_factor, time_per_move, time_left);
-    fflush(stderr);
-
-    if (fixed_depth != 0) {
-        if (iter != 0) {
-            return 0;
-        }
-        else {
-            return fixed_depth;
-        }
-    }
-
-    if (stats->depth == 0) {
-        return 2;
-    }
-
-    if (stats->time * branch_factor * 0.6 < time_per_move) {
-        return depth + 1;
-    }
-    if (iter != 0) {
-        return 0;
-    }
-
-    return depth;
-}
-
 void game_loop(FILE *fp) {
     board_t move;
 
@@ -92,7 +46,7 @@ void game_loop(FILE *fp) {
             board_t moves[MAX_MOVES];
             int num_moves = sn_find_moves(&sn, moves);
             for (int m = 0; m < num_moves; ++m) {
-                write_move(out, (sn.white | sn.black) & moves[m], ~(sn.white | sn.black) & moves[m]);
+                write_move(out, (sn.board[C_WHITE] | sn.board[C_BLACK]) & moves[m], ~(sn.board[C_WHITE] | sn.board[C_BLACK]) & moves[m]);
                 puts(out);
             }
             puts("--------");
@@ -104,10 +58,10 @@ void game_loop(FILE *fp) {
             continue;
         } else if (read_log(line)) {
             fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
-                    sn.white.hi,
-                    sn.white.low,
-                    sn.black.hi,
-                    sn.black.low,
+                    sn.board[C_WHITE].hi,
+                    sn.board[C_WHITE].low,
+                    sn.board[C_BLACK].hi,
+                    sn.board[C_BLACK].low,
                     fixed_depth,
                     score);
             continue;
@@ -133,11 +87,7 @@ void game_loop(FILE *fp) {
                 depth = 4;
 
             } else {
-
-                int score1, score2, score_tot;
-
-                sn_scores(&sn, &score1, &score2, &score_tot);
-                int expected_moves_left = max(1,min(score1, score2)) * 2;
+                int expected_moves_left = max(1, sn_min_solution_distance(&sn)) * 2;
 
                 long time_per_move = (29*1000 - total_time) / (expected_moves_left / 2);
 
@@ -154,17 +104,16 @@ void game_loop(FILE *fp) {
         move = negamax_memory_decision(sn, depth, &score);
         move_time = std::chrono::duration_cast<std::chrono::milliseconds>(my_clock::now() - start).count();
         fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
-                sn.white.hi,
-                sn.white.low,
-                sn.black.hi,
-                sn.black.low,
+                sn.board[C_WHITE].hi,
+                sn.board[C_WHITE].low,
+                sn.board[C_BLACK].hi,
+                sn.board[C_BLACK].low,
                 depth,
                 score);
 
-//        fprintf(stderr, "#Move took %ld milliseconds\n", std::chrono::duration_cast<std::chrono::milliseconds>(move_time).count());
         fflush(stderr);
 
-        write_move(out, (sn.white | sn.black) & move, ~(sn.white | sn.black) & move);
+        write_move(out, (sn.board[C_WHITE] | sn.board[C_BLACK]) & move, ~(sn.board[C_WHITE] | sn.board[C_BLACK]) & move);
 
         sn = sn_apply_move(sn, move);
 

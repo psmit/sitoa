@@ -2,6 +2,9 @@
 
 #include "headers.h"
 
+/*
+ * Find the direct neighbours of all bits set in board, excluding the bits set in board itself.
+ */
 inline // inlining seems to be 10% faster
 board_t find_neighbors(const board_t &board) {
     // Superfast way of finding all neighbors on a board. The B_HAS_ vectors make sure that a board has the NORTH/WEST/EAST neighbour and the bitshifts do the rest
@@ -12,6 +15,13 @@ board_t find_neighbors(const board_t &board) {
             ((board & B_HAS_EAST) << 1))
             ^ board; // at last the xor to remove the original board
 }
+
+/*
+ * Find all clusters in board and add them to clusters.
+ *
+ * This method can be used for incremental updates, it will add the clusters at index num_clusters
+ *
+ */
 
 int find_clusters(board_t board, board_t clusters[MAX_VERTICES], int num_clusters) {
     board_t cluster;
@@ -25,15 +35,14 @@ int find_clusters(board_t board, board_t clusters[MAX_VERTICES], int num_cluster
 
         // expand cluster with it's neighbors
         while (1) {
-            // TODO would it be more efficient to search with only new neighbors?
-            neighbors = find_neighbors(cluster);
+            neighbors = find_neighbors(cluster) & board;
 
-            if (board & neighbors) {
+            if (neighbors) {
                 // add neighbors that are also on the board
-                cluster |= (board & neighbors);
+                cluster |= (neighbors);
                 // and remove them from the board
-                board ^= (board & neighbors);
-            } else {
+                board ^= (neighbors);
+            } else { // there is no new neighbors to add
                 break;
             }
         }
@@ -87,6 +96,11 @@ void find_articulation_points_recursive(board_t graph, board_t un, int ui, int *
         }
     }
 }
+
+/*
+ * Algorithm to find the articulation points in a graph. In Ayu, only non-articulation points can be used to move from
+ * (except for single stone clusters)
+ */
 
 board_t find_articulation_points(board_t graph) {
     int parent[BOARD_SIZE * BOARD_SIZE];

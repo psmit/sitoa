@@ -10,9 +10,9 @@ include_directories (
 )
 add_executable ( sitoa sitoa.cpp )
 
-set(TOOL_CMDS calculate_score expand_move_opponent time_it test_svm)
+set(TOOL_CMDS calculate_score expand_move_opponent time_it )
 foreach(TOOL_CMD ${TOOL_CMDS})
-    add_executable ( ${TOOL_CMD} tools/${TOOL_CMD}.cpp vendor/svm.cpp)
+    add_executable ( ${TOOL_CMD} tools/${TOOL_CMD}.cpp )
     set_target_properties ( ${TOOL_CMD} PROPERTIES COMPILE_FLAGS -mcmodel=large )
 endforeach(TOOL_CMD)
 

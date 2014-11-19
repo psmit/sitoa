@@ -3,8 +3,7 @@
 #include "headers.h"
 
 struct search_node {
-    board_t white;
-    board_t black;
+    board_t board[2];
     hash_t hash;
     int ply;
 
@@ -16,31 +15,25 @@ struct search_node {
 };
 
 search_node sn_apply_move(search_node n, board_t move) {
-    int color;
-    board_t reval = B_EMPTY;
+    int color = n.ply % 2 ? C_BLACK : C_WHITE;
+    n.board[color] ^= move;
+    n.hash ^= rand_table[(n.board[color] & move).ctz()][color] ^ rand_table[(~n.board[color] & move).ctz()][color];
 
-    if(n.ply % 2) {
-        n.black ^= move;
-        n.hash ^= rand_table[(n.black & move).ctz()][1] ^ rand_table[(~n.black & move).ctz()][C_BLACK];
-        color = C_BLACK;
-        reval = n.black;
-    } else {
-        n.white ^= move;
-        n.hash ^= rand_table[(n.white & move).ctz()][0] ^ rand_table[(~n.white & move).ctz()][C_WHITE];
-        color = C_WHITE;
-        reval = n.white;
-    }
+
+    board_t reval = n.board[color];
     n.ply++;
 
 
-    board_t to = (n.black | n.white) & move;
+    board_t move_to = n.board[color] & move;
+
+
     // Keep the clusters and cluster_neighbours variables up-to-date
     int cluster = 0;
 
 
     while (cluster < n.num_clusters[color]) {
         // If the clusters borders with the "to" location,
-        if (n.cluster_neighbours[color][cluster] & to) {
+        if (n.cluster_neighbours[color][cluster] & move_to) {
             // Remove the cluster by overriding it with the last cluster and decrementing the amount of clusters
             --n.num_clusters[color];
             n.clusters[color][cluster] = n.clusters[color][n.num_clusters[color]];
@@ -55,6 +48,7 @@ search_node sn_apply_move(search_node n, board_t move) {
         }
     }
 
+    //Everything in reval are new clusters, find them
     int new_clusters = find_clusters(reval, n.clusters[color], n.num_clusters[color]);
 
     // update parallel arrays
@@ -68,12 +62,14 @@ search_node sn_apply_move(search_node n, board_t move) {
 
 int sn_find_moves(search_node const * node, board_t * moves) {
     int color = node->ply % 2 ? C_BLACK : C_WHITE;
-    return find_possible_moves_precalc(node->ply % 2 ? node->black: node->white, node->ply % 2 ? node->white: node->black, moves, node->clusters[color], node->num_clusters[color], node->cluster_articulation_points[color]);
+
+    return find_possible_moves_precalc(node->board[color], node->board[1-color], moves,
+            node->clusters[color], node->num_clusters[color], node->cluster_articulation_points[color]);
 }
 
 int sn_score(search_node const * node) {
-    int score_black = find_solution_distance_precalc(node->black, node->white, node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
-    int score_white = find_solution_distance_precalc(node->white, node->black, node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
+    int score_black = find_solution_distance_precalc(node->board[C_BLACK], node->board[C_WHITE], node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
+    int score_white = find_solution_distance_precalc(node->board[C_WHITE], node->board[C_BLACK], node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
 
     if (node->ply % 2 == 1) {
         return score_white - score_black;
@@ -83,8 +79,8 @@ int sn_score(search_node const * node) {
 }
 
 void sn_scores(search_node const * node, int * score_me, int * score_oth, int * score_tot) {
-    int score_black = find_solution_distance_precalc(node->black, node->white, node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
-    int score_white = find_solution_distance_precalc(node->white, node->black, node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
+    int score_black = find_solution_distance_precalc(node->board[C_BLACK], node->board[C_WHITE], node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
+    int score_white = find_solution_distance_precalc(node->board[C_WHITE], node->board[C_BLACK], node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
 
     if (node->ply % 2 == 1) {
         *score_me = score_white;
@@ -97,27 +93,27 @@ void sn_scores(search_node const * node, int * score_me, int * score_oth, int * 
     }
 }
 
-int sn_min_solution_distance(search_node * node) {
-    int score_black = find_solution_distance_precalc(node->black, node->white, node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
-    int score_white = find_solution_distance_precalc(node->white, node->black, node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
-    return max(score_black, score_white);
+int sn_min_solution_distance(search_node const * node) {
+    int score_black = find_solution_distance_precalc(node->board[C_BLACK], node->board[C_WHITE], node->num_clusters[C_BLACK], node->clusters[C_BLACK]);
+    int score_white = find_solution_distance_precalc(node->board[C_WHITE], node->board[C_BLACK], node->num_clusters[C_WHITE], node->clusters[C_WHITE]);
+    return min(score_black, score_white);
 }
 
 void sn_dump(FILE * out, search_node * node) {
     fprintf(out, "Dump Search node\nPly %d; hash %016" PRIx64 "\n", node->ply, node->hash);
     char out_s[256];
-    visualize_board(out_s, "BW", node->black, node->white);
+    visualize_board(out_s, "BW", node->board[C_BLACK], node->board[C_WHITE]);
     fputs(out_s, out);
 
     fprintf(out, "Score Black: %d, White: %d, Node score: %d Player: %s\n",
-            find_solution_distance(node->black, node->white),
-            find_solution_distance(node->white, node->black),
+            find_solution_distance(node->board[C_BLACK], node->board[C_WHITE]),
+            find_solution_distance(node->board[C_WHITE], node->board[C_BLACK]),
             sn_score(node), node->ply % 2 ? "Black": "White");
 }
 
 void sn_init(search_node * sn, board_t white, board_t black, int ply) {
-    sn->white = white;
-    sn->black = black;
+    sn->board[C_WHITE] = white;
+    sn->board[C_BLACK] = black;
     sn->ply = ply;
     sn->hash = init_hash(white, black);
     sn->num_clusters[C_WHITE] = find_clusters(white, sn->clusters[C_WHITE], 0);
