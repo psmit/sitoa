@@ -9,7 +9,6 @@ struct search_node {
 
     int num_clusters[2];
     board_t clusters[2][MAX_VERTICES];
-    board_t cluster_neighbours[2][MAX_VERTICES];
     board_t cluster_articulation_points[2][MAX_VERTICES];
 
 };
@@ -33,12 +32,11 @@ search_node sn_apply_move(search_node n, board_t move) {
 
     while (cluster < n.num_clusters[color]) {
         // If the clusters borders with the "to" location,
-        if (n.cluster_neighbours[color][cluster] & move_to) {
+        if (find_neighbors(n.clusters[color][cluster]) & move_to) {
             // Remove the cluster by overriding it with the last cluster and decrementing the amount of clusters
             --n.num_clusters[color];
             n.clusters[color][cluster] = n.clusters[color][n.num_clusters[color]];
             // dont forget to do the same for parallel arrays
-            n.cluster_neighbours[color][cluster] = n.cluster_neighbours[color][n.num_clusters[color]];
             n.cluster_articulation_points[color][cluster] = n.cluster_articulation_points[color][n.num_clusters[color]];
         } else {
             // If this cluster is not affected we remove it from reval, it does not need to be re-evaluated again.
@@ -53,7 +51,6 @@ search_node sn_apply_move(search_node n, board_t move) {
 
     // update parallel arrays
     for (cluster = n.num_clusters[color]; cluster < new_clusters; ++cluster) {
-        n.cluster_neighbours[color][cluster] = find_neighbors(n.clusters[color][cluster]);
         n.cluster_articulation_points[color][cluster] = find_articulation_points(n.clusters[color][cluster]);
     }
     n.num_clusters[color] = new_clusters;
@@ -121,7 +118,6 @@ void sn_init(search_node * sn, board_t white, board_t black, int ply) {
     int color, cluster;
     for(color = 0; color < 2; ++color) {
         for(cluster = 0; cluster < sn->num_clusters[color]; ++cluster) {
-            sn->cluster_neighbours[color][cluster] = find_neighbors(sn->clusters[color][cluster]);
             sn->cluster_articulation_points[color][cluster] = find_articulation_points(sn->clusters[color][cluster]);
         }
     }
