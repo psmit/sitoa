@@ -1,4 +1,10 @@
 import html
+
+if 'unescape' in dir(html):
+    unescape = html.unescape
+else:
+    import html.parser
+    unescape = html.parser.HTMLParser().unescape
 import re
 import sys
 from urllib.request import Request, urlopen
@@ -13,13 +19,13 @@ def get_log(base_url, gameid, cookie):
     log = None
     for line in body.splitlines():
         if line.startswith("<b>Player messages:</b><br>"):
-            log = html.unescape(line[len("<b>Player messages:</b><br>"):]).split("<br>")
-        if line.startswith("<b>Checker messages:</b><br>You&nbsp;have&nbsp;been&nbsp;disqualified"):
-            log = None
+            log = unescape(line[len("<b>Player messages:</b><br>"):]).split("<br>")
+        # if line.startswith("<b>Checker messages:</b><br>You&nbsp;have&nbsp;been&nbsp;disqualified"):
+        #     log = None
 
     if log:
         with open('../games/{}.log'.format(gameid), 'w') as out_f:
-            out_f.write("\n".join(log))
+            out_f.write("\n".join(log).replace("\u00A0", " "))
 
 def main(competition_url, cookie):
     request = Request(competition_url, headers={'Cookie': cookie})
