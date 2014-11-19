@@ -130,8 +130,28 @@ void game_loop(FILE *fp) {
         if (fixed_depth != 0) {
             depth = fixed_depth;
         } else {
-            if (move_time < std::chrono::milliseconds(300)) {
-                depth++;
+
+            if (total_time > std::chrono::seconds(25)) {
+                depth = 4;
+
+            } else {
+
+                int score1, score2, score_tot;
+
+                sn_scores(&sn, &score1, &score2, &score_tot);
+                int expected_moves_left = max(1,min(score1, score2)) * 2;
+
+                auto time_per_move = std::chrono::milliseconds(29000) / expected_moves_left;
+
+                fprintf(stderr, "#%d %ld %ld %ld\n", expected_moves_left,
+                        std::chrono::duration_cast<std::chrono::milliseconds>(move_time).count(),
+                        std::chrono::duration_cast<std::chrono::milliseconds>(time_per_move).count(),
+                        std::chrono::duration_cast<std::chrono::milliseconds>(total_time).count());
+                if (move_time * 3 < time_per_move) {
+                    depth++;
+                } else if (move_time > 3 * time_per_move) {
+                    depth--;
+                }
             }
         }
 
@@ -145,7 +165,7 @@ void game_loop(FILE *fp) {
                 depth,
                 score);
 
-        fprintf(stderr, "#Move took %ld milliseconds\n", std::chrono::duration_cast<std::chrono::milliseconds>(move_time).count());
+//        fprintf(stderr, "#Move took %ld milliseconds\n", std::chrono::duration_cast<std::chrono::milliseconds>(move_time).count());
         fflush(stderr);
 
         write_move(out, (sn.white | sn.black) & move, ~(sn.white | sn.black) & move);
@@ -157,8 +177,8 @@ void game_loop(FILE *fp) {
         }
 
         if(STORAGE_ID * 2 > STORAGE_SIZE) {
+            fprintf(stderr, "#Clearing transposition table %u \n", STORAGE_ID);
             clear_transposition_table();
-            fputs("#Clearing transposition table\n", stderr);
         }
 
         puts(out);
@@ -175,8 +195,6 @@ void game_loop(FILE *fp) {
 
 int main(int argc, const char *argv[]) {
 
-//    init_stats();
-
     init_rand(0);
 
     FILE *fp = stdin;
@@ -188,8 +206,6 @@ int main(int argc, const char *argv[]) {
     if (argc > 1) {
         fclose(fp);
     }
-
-//    cleanup_stats();
 
     return 0;
 }
