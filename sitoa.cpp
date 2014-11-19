@@ -52,11 +52,9 @@ void game_loop(FILE *fp) {
     board_t move;
 
     auto start = my_clock::now();
-    auto total_time = start-start;
+    long total_time = 0l;
+    long move_time = 1000l;
 
-
-    auto move_time = start-start;
-    move_time += std::chrono::seconds(1);
     int debug = 0;
 
     char out[256];
@@ -131,7 +129,7 @@ void game_loop(FILE *fp) {
             depth = fixed_depth;
         } else {
 
-            if (total_time > std::chrono::seconds(25)) {
+            if (total_time > 25 * 1000) {
                 depth = 4;
 
             } else {
@@ -141,12 +139,10 @@ void game_loop(FILE *fp) {
                 sn_scores(&sn, &score1, &score2, &score_tot);
                 int expected_moves_left = max(1,min(score1, score2)) * 2;
 
-                auto time_per_move = std::chrono::milliseconds(29000) / expected_moves_left;
+                long time_per_move = (29*1000 - total_time) / (expected_moves_left / 2);
 
                 fprintf(stderr, "#%d %ld %ld %ld\n", expected_moves_left,
-                        std::chrono::duration_cast<std::chrono::milliseconds>(move_time).count(),
-                        std::chrono::duration_cast<std::chrono::milliseconds>(time_per_move).count(),
-                        std::chrono::duration_cast<std::chrono::milliseconds>(total_time).count());
+                        move_time, time_per_move, total_time);
                 if (move_time * 3 < time_per_move) {
                     depth++;
                 } else if (move_time > 3 * time_per_move) {
@@ -156,7 +152,7 @@ void game_loop(FILE *fp) {
         }
 
         move = negamax_memory_decision(sn, depth, &score);
-        move_time = my_clock::now() - start;
+        move_time = std::chrono::duration_cast<std::chrono::milliseconds>(my_clock::now() - start).count();
         fprintf(stderr, LOG_FORMAT_STRING, sn.ply,
                 sn.white.hi,
                 sn.white.low,
@@ -183,11 +179,11 @@ void game_loop(FILE *fp) {
 
         puts(out);
         fflush(stdout);
-        total_time += my_clock::now() - start;
+        total_time += std::chrono::duration_cast<std::chrono::milliseconds>(my_clock::now() - start).count();
     }
-    total_time += my_clock::now() - start;
+    total_time += std::chrono::duration_cast<std::chrono::milliseconds>(my_clock::now() - start).count();
 
-    fprintf(stderr, "Total time: %.2f seconds\n", std::chrono::duration_cast<std::chrono::milliseconds>(total_time).count() / 1000.0);
+    fprintf(stderr, "Total time: %.2f seconds\n", total_time / 1000.0);
     fflush(stderr);
 
     free(line);
