@@ -15,8 +15,8 @@ struct trans_node {
 
 unsigned int STORAGE_ID;
 
-trans_node *TRANS_TABLE[HASH_TABLE_SIZE] = {0};
-trans_node TRANS_STORAGE[STORAGE_SIZE] = {0};
+trans_node *TRANS_TABLE[HASH_TABLE_SIZE];
+trans_node TRANS_STORAGE[STORAGE_SIZE];
 
 trans_node *lookup(hash_t h) {
     trans_node *node = TRANS_TABLE[h % HASH_TABLE_SIZE];

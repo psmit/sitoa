@@ -3,6 +3,7 @@
 typedef std::chrono::high_resolution_clock my_clock;
 
 void game_loop(FILE *fp) {
+    clear_transposition_table();
     board_t move;
 
     auto start = my_clock::now();
@@ -84,8 +85,7 @@ void game_loop(FILE *fp) {
         } else {
 
             if (total_time > 25 * 1000) {
-                depth = 4;
-
+                depth = max(4, depth-2);
             } else {
                 int expected_moves_left = max(1, sn_min_solution_distance(&sn)) * 2;
 
