@@ -106,6 +106,10 @@ struct board_t {
         return __builtin_popcountll(hi) + __builtin_popcountll(low);
     }
 
+    inline int exactly_one_bit_set() const {
+        return (hi != 0 && (hi & (hi-1)) == 0) ^ (low != 0 && (low & (low-1)) == 0);
+    }
+
     inline board_t operator<<(const int &rhs) const {
         return {hi << rhs | (low >> (64-rhs)), low << rhs};
     }
