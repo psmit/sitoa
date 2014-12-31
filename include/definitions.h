@@ -107,7 +107,7 @@ struct board_t {
     }
 
     inline int exactly_one_bit_set() const {
-        return (hi != 0 && (hi & (hi-1)) == 0) ^ (low != 0 && (low & (low-1)) == 0);
+        return (hi != 0 && (hi & (hi-1)) == 0) != (low != 0 && (low & (low-1)) == 0);
     }
 
     inline board_t operator<<(const int &rhs) const {
