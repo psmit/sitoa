@@ -53,7 +53,7 @@ int find_possible_moves_precalc(board_t board_mover, board_t board_other, board_
             targets ^= target;
 
             // special case if cluster is of size 1, move is always valid
-            if (clusters[cluster_i].exactly_one_bit_set()) {
+            if (clusters[cluster_i].popcount() == 1) {
                 moves[num_moves++] = clusters[cluster_i] | target;
                 continue;
             }
